@@ -10,7 +10,6 @@ private:
 
 public:
     Tank(Cell* startingCell, Direction dir, int ammo = 16);
-    ~Tank();
 
     Direction getDirection() const;
     void setDirection(Direction dir);
