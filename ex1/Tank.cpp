@@ -3,8 +3,6 @@
 Tank::Tank(Cell* startingCell, Direction dir, int ammo=16)
     : cell(startingCell), direction(dir), ammo(ammo) {}
 
-Tank::~Tank() {}
-
 Direction Tank::getDirection() const {
     return direction;
 }
