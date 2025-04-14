@@ -1,5 +1,4 @@
-#ifndef DIRECTION_H
-#define DIRECTION_H
+#pragma once
 
 enum class Direction {
     U,   // Up
@@ -11,5 +10,3 @@ enum class Direction {
     L,   // Left
     UL   // Up-Left
 };
-
-#endif // DIRECTION_H

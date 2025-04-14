@@ -9,9 +9,9 @@ private:
     int ammo;
 
 public:
-    Tank(Cell* startingCell, Direction dir, int ammo = 16);
+    Tank(Cell* startingCell, Direction dir, int ammo);
 
-    Direction getDirection() const;
+    const Direction getDirection() const;
     void setDirection(Direction dir);
 
     int getAmmo() const;

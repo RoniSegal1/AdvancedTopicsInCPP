@@ -1,6 +1,6 @@
 #include "Tank.h"
 
-Tank::Tank(Cell* startingCell, Direction dir, int ammo=16)
+Tank::Tank(Cell* startingCell, Direction dir, int ammo = 16)
     : cell(startingCell), direction(dir), ammo(ammo) {}
 
 Direction Tank::getDirection() const {
