@@ -38,13 +38,14 @@ void Cell::removeTank(Tank* tank) {
     tanks.erase(tank);
 }
 
+const std::set<Tank*>& Cell::getTanks() const {
+    return tanks;
+}
+
 void Cell::clearTanks() {
     tanks.clear();
 }
 
-const std::set<Tank*>& Cell::getTanks() const {
-    return tanks;
-}
 
 void Cell::addShell(Shell* shell) {
     shells.insert(shell);
@@ -54,10 +55,10 @@ void Cell::removeShell(Shell* shell) {
     shells.erase(shell);
 }
 
-std::set<Shell*> Cell::getShells() const {
+const std::set<Shell*> Cell::getShells() const {
     return shells;
 }
 
 void Cell::clearShells() {
-    shells.clear(); //maybe add kill shells?
+    shells.clear();
 }
