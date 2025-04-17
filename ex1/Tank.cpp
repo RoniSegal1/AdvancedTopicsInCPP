@@ -1,7 +1,11 @@
 #include "Tank.h"
 
-Tank::Tank(Cell* startingCell, Direction dir, int ammo = 16)
-    : cell(startingCell), direction(dir), ammo(ammo) {}
+int Tank::nextSerialNumber = 1;
+
+Tank::Tank(Direction dir, int ammo)
+    : direction(dir), ammo(ammo), serialNumber(nextSerialNumber++) {}
+
+Tank::~Tank() {}
 
 Direction Tank::getDirection() const {
     return direction;
@@ -15,18 +19,40 @@ int Tank::getAmmo() const {
     return ammo;
 }
 
-bool Tank::shoot() {
-    if (ammo > 0){
+int Tank::getSerialNumber() const {
+    return serialNumber;
+}
+
+Shell* Tank::shoot() {
+    if (canShoot()) {
         ammo--;
-        return true;
+        startShootCooldown();
+        return new Shell(direction); // Shell gets its own serial number internally
     }
-    return false;
+    return nullptr;
 }
 
-Cell* Tank::getCell() const {
-    return cell;
+void Tank::startShootCooldown() {
+    shootCooldown = 4;
 }
 
-void Tank::setCell(Cell* newCell) {
-    cell = newCell;
+bool Tank::canShoot() const {
+    return shootCooldown == 0 && ammo > 0;
+}
+
+void Tank::startBackwardDelay() {
+    if (backwardDelay == 0)
+        backwardDelay = 2;
+}
+
+bool Tank::isReadyToMoveBackward() const {
+    return backwardDelay == 1;
+}
+
+void Tank::tick() {
+    if (shootCooldown > 0)
+        shootCooldown--;
+
+    if (backwardDelay > 0)
+        backwardDelay--;
 }
