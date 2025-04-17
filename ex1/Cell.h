@@ -18,7 +18,7 @@ private:
     TerrainType terrain;
     int wallHits; // -1 if no wall
     std::set<Tank*> tanks;
-    std::set<Shell*> shells;
+    std::set<Shell*> shells; // number of shells in Cell
 
 public:
     Cell(int x, int y);
@@ -39,6 +39,6 @@ public:
 
     void addShell(Shell* shell);
     void removeShell(Shell* shell);
-    std::set<Shell*> getShells() const;
+    const std::set<Shell*> getShells() const;
     void clearShells();
 };
