@@ -1,18 +1,18 @@
 #pragma once
 #include "Direction.h"
-#include "Cell.h"
 
 class Shell {
 private:
-    Cell* cell;
     Direction direction;
+    int serialNumber;
+
+    static int nextSerialNumber;
 
 public:
-    Shell(Cell* c, Direction dir);
+    Shell(Direction dir);
 
     Direction getDirection() const;
     void setDirection(Direction newDir);
 
-    Cell* getCell() const;
-    void setShell(Cell* newCell);
+    int getSerialNumber() const;
 };
