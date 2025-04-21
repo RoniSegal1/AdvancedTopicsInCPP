@@ -2,8 +2,8 @@
 
 int Tank::nextSerialNumber = 1;
 
-Tank::Tank(Direction dir, int ammo)
-    : direction(dir), ammo(ammo), serialNumber(nextSerialNumber++) {}
+Tank::Tank(Direction dir, int ammo, int playerId)
+    : direction(dir), ammo(ammo), playerId(playerId), serialNumber(nextSerialNumber++) {}
 
 Tank::~Tank() {}
 

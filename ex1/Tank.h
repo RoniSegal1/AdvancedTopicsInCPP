@@ -7,6 +7,7 @@ private:
     Direction direction;
     int ammo;
     int serialNumber;
+    int playerId;
 
     int shootCooldown = 0;  // counts down after each shot
     int backwardDelay = 0;  // 0 = not waiting, >0 = waiting for backward move
