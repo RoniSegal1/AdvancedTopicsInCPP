@@ -1,18 +1,20 @@
 #pragma once
 #include "Direction.h"
+#include "Entity.h"
 
-class Shell {
+class Shell : public Entity {
 private:
+    int x;
+    int y;
     Direction direction;
-    int serialNumber;
-
-    static int nextSerialNumber;
 
 public:
-    Shell(Direction dir);
+    Shell(int x, int y, Direction dir);
 
     Direction getDirection() const;
-    void setDirection(Direction newDir);
+    std::pair<int,int> getPosition() const override;
+    void setPosition(int newX, int newY);
+    
+    std::pair<int, int> getNextShellPosition() const;
 
-    int getSerialNumber() const;
 };
