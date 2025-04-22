@@ -69,7 +69,7 @@ void GameManager::processTurn() {
     rebuildPositionMap(); //אם משתמשים בו רק בריסולב כוליסיון - אין צורך לקרוא לו גם אחריו
     resolveCollisions();
     checkWinConditions();
-    board.update();
+    //board.update();
 }
 
 void GameManager::applyActions(const std::string& action1, const std::string& action2) {
