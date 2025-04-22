@@ -1,5 +1,7 @@
 #include "Player.h"
 
+Player::Player() {}
+
 Player::Player(int id) : playerId(id) {}
 
 int Player::getId() const {
