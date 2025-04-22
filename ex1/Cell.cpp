@@ -3,7 +3,7 @@
 #include "Shell.h"
 
 Cell::Cell(int x, int y)
-    : x(x), y(y), terrain(TerrainType::Empty), wallHits(-1), tanks(), shells() {}
+    : x(x), y(y), terrain(TerrainType::Empty), wallHits(-1) {}
 
 std::pair<int, int> Cell::getPoint() const {
     return {x, y};
@@ -28,37 +28,4 @@ void Cell::incrementWallHits() {
 void Cell::resetWall() {
     wallHits = -1;
     terrain = TerrainType::Empty;
-}
-
-void Cell::addTank(Tank* tank) {
-    tanks.insert(tank);
-}
-
-void Cell::removeTank(Tank* tank) {
-    tanks.erase(tank);
-}
-
-const std::set<Tank*>& Cell::getTanks() const {
-    return tanks;
-}
-
-void Cell::clearTanks() {
-    tanks.clear();
-}
-
-
-void Cell::addShell(Shell* shell) {
-    shells.insert(shell);
-}
-
-void Cell::removeShell(Shell* shell) {
-    shells.erase(shell);
-}
-
-const std::set<Shell*> Cell::getShells() const {
-    return shells;
-}
-
-void Cell::clearShells() {
-    shells.clear();
 }
