@@ -1,0 +1,5 @@
+1. before tank move, we need to check if its in backward delay.
+2. positionMap in GameManager for collisions: {(0,1):[Tank1, Shell2],(5,4):[Shell2],(9,4):[Tank2,Shell4]}
+3. Sets of Tank pointers and Shell pointers in Board.
+4. GameManager.LoadGame() creates the positionMap.
+5. No problem for double pointers as long as we make sure to delete them both when needed.
