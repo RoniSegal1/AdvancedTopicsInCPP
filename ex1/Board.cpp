@@ -1,6 +1,5 @@
 #include "Board.h"
 #include "Cell.h"
-#include "Tank.h"
 
 Board::Board(int w, int h) : width(w), height(h), grid(h) {
     for (int y = 0; y < h; ++y) {
@@ -16,10 +15,6 @@ Cell& Board::getCell(int x, int y) { // needed bhirat mehdal of cell
     return grid[y][x];
 }
 
-void Board::update() {
-    // for what?
-}
-
 int Board::getWidth() const {
   return width;
 }
@@ -28,22 +23,39 @@ int Board::getHeight() const {
   return height;
 }
 
-void Board::wrapPosition(int& x, int& y) const { //check if needed
+void Board::addTank(Tank* tank) {
+    tanks.insert(tank);
+}
+
+void Board::removeTank(Tank* tank) {
+    tanks.erase(tank);
+}
+
+const std::set<Tank*>& Board::getTanks() const {
+    return tanks;
+}
+
+void Board::clearTanks() {
+    tanks.clear();
+}
+
+void Board::addShell(Shell* shell) {
+    shells.insert(shell);
+}
+
+void Board::removeShell(Shell* shell) {
+    shells.erase(shell);
+}
+
+const std::set<Shell*> Board::getShells() const {
+    return shells;
+}
+
+void Board::clearShells() {
+    shells.clear();
+}
+
+void Board::wrapPosition(int& x, int& y) { //check if needed
     x = (x + width) % width;
     y = (y + height) % height;
-}
-
-void Board::addWall(int row, int col) {
-    getCell(col, row).setTerrain(TerrainType::Wall);
-}
-
-void Board::addMine(int row, int col) {
-    getCell(col, row).setTerrain(TerrainType::Mine);
-}
-
-void Board::addTank(int row, int col, int playerId) {
-    Direction dir = (playerId == 1 ? Direction::LEFT : Direction::RIGHT);
-    auto tank = std::make_shared<Tank>(col, row, dir, playerId);
-    getCell(col, row).setTank(tank);
-    tanks.insert(tank);
 }
