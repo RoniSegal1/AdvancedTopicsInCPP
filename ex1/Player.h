@@ -8,6 +8,7 @@ private:
     std::set<Tank*> tanks; // One tank for now, multiple in future
 
 public:
+    Player();
     Player(int id);
 
     int getId() const;
