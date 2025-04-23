@@ -3,3 +3,6 @@
 3. Sets of Tank pointers and Shell pointers in Board.
 4. GameManager.LoadGame() creates the positionMap.
 5. No problem for double pointers as long as we make sure to delete them both when needed.
+ REAL JOB:
+6. move includes to headers
+7. cleanup()
