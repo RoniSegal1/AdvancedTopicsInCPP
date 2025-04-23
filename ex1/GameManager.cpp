@@ -1,4 +1,8 @@
 #include "GameManager.h"
+#include "Board.h"
+#include "Player.h"
+#include "Tank.h"
+#include "Entity.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -94,15 +98,15 @@ void GameManager::moveShells() {
 
 void GameManager::resolveCollisions() {
     for (auto& [pos, entities] : positionMap) {
-      bool removeTanks = false;
-      bool removeShells = false;
+        bool removeTanks = false;
+        bool removeShells = false;
+
         if (entities.size() < 2)
             continue;
 
         std::vector<Tank*> localTanks;
         std::vector<Shell*> localShells;
 
-        // Categorize all entities at this position
         for (Entity* ent : entities) {
             switch (ent->getType()) {
                 case EntityType::Tank:
@@ -111,61 +115,53 @@ void GameManager::resolveCollisions() {
                 case EntityType::Shell:
                     localShells.push_back(static_cast<Shell*>(ent));
                     break;
-                default: break;
+                default:
+                    break;
             }
         }
 
-        // Shell hits Wall
         Cell& cell = board.getCell(pos.first, pos.second);
         if (cell.getTerrain() == TerrainType::Wall) {
-          cell.incrementWallHits();
+            cell.incrementWallHits();
             if (cell.getWallHits() >= 2) {
-                cell.resetWall(); // wall disappears
+                cell.resetWall();
             }
             removeShells = true;
-
-            continue; // no need to handle other collisions in wall cell
+            continue;
         }
 
-        // Tank hits Mine
         if (cell.getTerrain() == TerrainType::Mine) {
             removeShells = true;
             removeTanks = true;
-            continue; // handeled all collisions
+            continue;
         }
 
-        // Shell vs Shell
-        if (localShells.size() > 1) {
+        if (localShells.size() > 1)
             removeShells = true;
-        }
 
-        // Shell vs Tank
         if (!localShells.empty() && !localTanks.empty()) {
             removeShells = true;
             removeTanks = true;
         }
 
-        // Tank vs Tank
-        if (localTanks.size() > 1) {
-          removeTanks = true;
-        }
+        if (localTanks.size() > 1)
+            removeTanks = true;
 
-        // Remove tanks
         for (Tank* tank : localTanks) {
-        // Also remove from the player
-        if (player1->getTanks().count(tank)) {
-            destroyTank(tank, player1);
-        } else {
-            destroyTank(tank, player2);
+            if (player1.getTanks().count(tank)) {
+                destroyTank(tank, &player1);
+            } else {
+                destroyTank(tank, &player2);
+            }
         }
 
-        // Remove shells
-    	for (Shell* shell : localShells) {
-        	board.removeShell(shell);
-        	delete shell;
-    	}
+        for (Shell* shell : localShells) {
+            board.removeShell(shell);
+            delete shell;
+        }
     }
 }
+
 
 
 bool GameManager::checkWinConditions() {
