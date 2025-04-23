@@ -1,8 +1,12 @@
 #include "GameManager.h"
 #include <iostream>
 #include <fstream>
+#include <string>
+#include <vector>
+#include <map>
 
-// Construcot
+
+// Constructor
 GameManager::GameManager()
     : board(0, 0),
       algo1(nullptr),
@@ -89,23 +93,23 @@ void GameManager::moveShells() {
 }
 
 void GameManager::resolveCollisions() {
-    for (auto& [pos, objects] : positionMap) {
+    for (auto& [pos, entities] : positionMap) {
       bool removeTanks = false;
       bool removeShells = false;
-        if (objects.size() < 2)
+        if (entities.size() < 2)
             continue;
 
         std::vector<Tank*> localTanks;
         std::vector<Shell*> localShells;
 
-        // Categorize all objects at this position
-        for (Object* obj : objects) {
-            switch (obj->getType()) {
-                case ObjectType::Tank:
-                    localTanks.push_back(static_cast<Tank*>(obj));
+        // Categorize all entities at this position
+        for (Entity* ent : entities) {
+            switch (ent->getType()) {
+                case EntityType::Tank:
+                    localTanks.push_back(static_cast<Tank*>(ent));
                     break;
-                case ObjectType::Shell:
-                    localShells.push_back(static_cast<Shell*>(obj));
+                case EntityType::Shell:
+                    localShells.push_back(static_cast<Shell*>(ent));
                     break;
                 default: break;
             }
@@ -124,7 +128,6 @@ void GameManager::resolveCollisions() {
         }
 
         // Tank hits Mine
-        Cell& cell = board.getCell(pos.first, pos.second);
         if (cell.getTerrain() == TerrainType::Mine) {
             removeShells = true;
             removeTanks = true;
@@ -148,7 +151,7 @@ void GameManager::resolveCollisions() {
         }
 
         // Remove tanks
-        for (Tank* tank : tanksToRemove) {
+        for (Tank* tank : localTanks) {
         // Also remove from the player
         if (player1->getTanks().count(tank)) {
             destroyTank(tank, player1);
@@ -157,11 +160,12 @@ void GameManager::resolveCollisions() {
         }
 
         // Remove shells
-    	for (Shell* shell : shellsToRemove) {
+    	for (Shell* shell : localShells) {
         	board.removeShell(shell);
         	delete shell;
     	}
     }
+}
 
 
 bool GameManager::checkWinConditions() {
