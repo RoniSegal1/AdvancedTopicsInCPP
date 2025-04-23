@@ -22,7 +22,7 @@ private:
     std::vector<std::string> inputErrors;
 
     int stepCounter = 0;
-    int maxStepsAfterOutOfAmmo = 40;
+    int drawCountdown = -1;
 
     TankAlgorithm* algo1;
     TankAlgorithm* algo2;

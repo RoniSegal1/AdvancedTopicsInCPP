@@ -20,7 +20,7 @@ public:
 
     void addTank(Tank* tank);
     void removeTank(Tank* tank);
-    const std::set<Tank*>& getTanks() const;
+    const std::set<Tank*>& getTanks() const; //TODO: delete const?
     void clearTanks();
 
     void addShell(Shell* shell);

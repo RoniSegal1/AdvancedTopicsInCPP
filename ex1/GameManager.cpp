@@ -8,7 +8,7 @@ GameManager::GameManager()
       algo1(nullptr),
       algo2(nullptr),
       stepCounter(0),
-      maxStepsAfterOutOfAmmo(40),
+      drawCountdown (-1),
       players{ &player1, &player2 },
       shells(),
       positionMap(),
@@ -89,13 +89,133 @@ void GameManager::moveShells() {
 }
 
 void GameManager::resolveCollisions() {
-    // TODO: טיפול בהתנגשויות
-}
+    for (auto& [pos, objects] : positionMap) {
+      bool removeTanks = false;
+      bool removeShells = false;
+        if (objects.size() < 2)
+            continue;
+
+        std::vector<Tank*> localTanks;
+        std::vector<Shell*> localShells;
+
+        // Categorize all objects at this position
+        for (Object* obj : objects) {
+            switch (obj->getType()) {
+                case ObjectType::Tank:
+                    localTanks.push_back(static_cast<Tank*>(obj));
+                    break;
+                case ObjectType::Shell:
+                    localShells.push_back(static_cast<Shell*>(obj));
+                    break;
+                default: break;
+            }
+        }
+
+        // Shell hits Wall
+        Cell& cell = board.getCell(pos.first, pos.second);
+        if (cell.getTerrain() == TerrainType::Wall) {
+          cell.incrementWallHits();
+            if (cell.getWallHits() >= 2) {
+                cell.resetWall(); // wall disappears
+            }
+            removeShells = true;
+
+            continue; // no need to handle other collisions in wall cell
+        }
+
+        // Tank hits Mine
+        Cell& cell = board.getCell(pos.first, pos.second);
+        if (cell.getTerrain() == TerrainType::Mine) {
+            removeShells = true;
+            removeTanks = true;
+            continue; // handeled all collisions
+        }
+
+        // Shell vs Shell
+        if (localShells.size() > 1) {
+            removeShells = true;
+        }
+
+        // Shell vs Tank
+        if (!localShells.empty() && !localTanks.empty()) {
+            removeShells = true;
+            removeTanks = true;
+        }
+
+        // Tank vs Tank
+        if (localTanks.size() > 1) {
+          removeTanks = true;
+        }
+
+        // Remove tanks
+        for (Tank* tank : tanksToRemove) {
+        // Also remove from the player
+        if (player1->getTanks().count(tank)) {
+            destroyTank(tank, player1);
+        } else {
+            destroyTank(tank, player2);
+        }
+
+        // Remove shells
+    	for (Shell* shell : shellsToRemove) {
+        	board.removeShell(shell);
+        	delete shell;
+    	}
+    }
+
 
 bool GameManager::checkWinConditions() {
-    // TODO: בדיקת סיום משחק
-    return false;
+    bool p1Alive = player1->hasAliveTanks();
+    bool p2Alive = player2->hasAliveTanks();
+
+    if (!p1Alive && !p2Alive) {
+        std::cout << "Tie! Both tanks destroyed.\n";
+        return true;
+    }
+
+    if (!p1Alive) {
+        std::cout << "Player 2 wins! Player 1 destroyed.\n";
+        return true;
+    }
+
+    if (!p2Alive) {
+        std::cout << "Player 1 wins! Player 2 destroyed.\n";
+        return true;
+    }
+
+    // Check if both players are out of shells
+    bool p1Out = true, p2Out = true;
+
+    for (Tank* t : player1->getTanks()) {
+        if (t->getRemainingShells() > 0) {
+            p1Out = false;
+            break;
+        }
+    }
+
+    for (Tank* t : player2->getTanks()) {
+        if (t->getRemainingShells() > 0) {
+            p2Out = false;
+            break;
+        }
+    }
+
+    if (p1Out && p2Out) {
+        if (drawCountdown == -1) {
+            drawCountdown = 40;
+            std::cout << "Both players out of shells. Starting 40-turn countdown.\n";
+        } else {
+            drawCountdown--;
+            if (drawCountdown == 0) {
+                std::cout << "Tie! 40 steps passed with no winner.\n";
+                return true;
+            }
+        }
+    }
+
+    return false; // game continues
 }
+
 
 void GameManager::logBadAction(int playerId, const std::string& action) {
     std::cerr << "Player " << playerId << " made invalid move: " << action << "\n";
