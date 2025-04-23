@@ -8,7 +8,7 @@ GameManager::GameManager()
       algo1(nullptr),
       algo2(nullptr),
       stepCounter(0),
-      drawCountdown (-1),
+      drawCountdown(-1),
       players{ &player1, &player2 },
       shells(),
       positionMap(),
