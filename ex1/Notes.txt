@@ -6,3 +6,12 @@
  REAL JOB:
 6. move includes to headers
 7. cleanup()
+8. update Shoot() so that the new shell is one cell away from me (I'm a Tank :) )
+9. General Tank algorithm:
+mines dist 1 from me
+a function which gets the positionMap after move shells - and checks whether there are shells dist 1 from me or in the shell's move direction (shadow).
+10. Basic Tank Algorithm:
+check whether i need to run for my life (if i cant because of my direction - dont move)Microsoft.QuickAction.AirplaneMode
+shoot (if i close enough)
+11. Chasing Tank Algorithm:
+if im not basic - run BFS or A* but without restricted cells, which i get from General Tank Algoooo.
