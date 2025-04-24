@@ -17,3 +17,5 @@ shoot (if i close enough)
 if im not basic - run BFS or A* but without restricted cells, which i get from General Tank Algoooo.
 12. check if we can rebuild position map fewer times.
 13. can we shorten an object complex type?
+14. טיפול שגיאה של טנק שמגיע בטעות לקיר מהיבט הגיים מנג'ר וכן מהטנק אלגוריתם
+15. 
