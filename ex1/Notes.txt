@@ -21,3 +21,4 @@ if im not basic - run BFS or A* but without restricted cells, which i get from G
 15. האם להתחשב בטילים שמתפוצצים בדרך אז אין צורך לברוח?
 16. Tank.shoot() - the new shell is one cell away from tank.
 17. repetetive code in TankAlgorithms of delta wraps directions....
+18. אם בחרתי לעשות צעד אחורה, והטיל נע לאותו כיוון, בחר צעד אחר.
