@@ -14,3 +14,6 @@ if im not basic - run BFS or A* but without restricted cells, which i get from G
 17. repetetive code in TankAlgorithms of delta wraps directions....
 19. update ApplyActions according to file (backward moves)
 20. update BasicAlgo according to file (backward moves) במידה ואחרי שביצעתי צעד אחורה אני רוצה לעשות צעד קדימה אפשר לבטל כלומר אם הסכנה השתנתה
+21. טנק וטיל במרחק משבצת אחת אחד מהשני וכיוונים מנוגדים - הגיים מנג'ר לא ידע לפוצץ אותם.
+מצד אחד זה בסדר כי בנינו את האלגוריתם של הטנק כך שלא ילך לכיוון טיל
+מצד שני הגיים מנג'ר כן צריך לפוצץ אותם במקרה כזה ולכן זה סוג של חור במימוש גיים מנג'ר
