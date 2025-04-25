@@ -13,4 +13,4 @@ if im not basic - run BFS or A* but without restricted cells, which i get from G
 15. האם להתחשב בטילים שמתפוצצים בדרך אז אין צורך לברוח?
 17. repetetive code in TankAlgorithms of delta wraps directions....
 19. update ApplyActions according to file (backward moves)
-20. update BasucAlgo according to file (backward moves) במידה ואחרי שביצעתי צעד אחורה אני רוצה לעשות צעד קדימה אפשר לבטל כלומר אם הסכנה השתנתה
+20. update BasicAlgo according to file (backward moves) במידה ואחרי שביצעתי צעד אחורה אני רוצה לעשות צעד קדימה אפשר לבטל כלומר אם הסכנה השתנתה
