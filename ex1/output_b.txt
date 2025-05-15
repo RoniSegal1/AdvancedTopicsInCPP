@@ -1,0 +1,9 @@
+Player 1: RotateLeft1_4
+Player 2: MoveForward
+Player 1: RotateLeft1_4
+Player 2: MoveForward
+Player 1: RotateRight1_8
+Player 2: RotateLeft1_8
+Player 1: RotateLeft1_8
+Player 2: Shoot
+Player 2 wins! Player 1 destroyed.
