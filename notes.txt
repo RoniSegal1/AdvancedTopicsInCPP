@@ -1,0 +1,20 @@
+טעינת קובץ קלט לפי ההוראות החדשות
+בניית תקיית common עם מחלקות הבסיס הנתונות במטלה
+לשנות את ACTION לGETACTION ואת הבפנוכו בהתאמה
+להעביר תיקיות (לאחר שסרקנו אותן) גם לתוך תקיית src וinclude חוץ מטנק אלגוריתם וגיים מנג'ר
+לעדכן את קובץ הפלט לפי הדרישות החדשות
+
+
+לתקן בכל שורות הקוד RULE OF FIVE ולשפר לSHARED/UNIQUE_PTR במקרה הצורך
+
+
+שאלות:
+האם הGETOBJAT מחזיר את מיקום הערך בתחילת התור או בסופו?
+תשובה:
+בתחילת התור
+
+1. add serial number for Tank (starting from 0, for each player)
+2. extract GameManager outside functions
+3. Does GameManager decides wihich Algorithm each Tank gets?
+   Shouldn't it be the Player who decides?
+4. add a function to Player which returns haw many tanks it has.

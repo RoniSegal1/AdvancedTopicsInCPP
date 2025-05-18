@@ -1,11 +1,12 @@
+// MyPlayer.h
 #pragma once
 
 #include "common/Player.h"
 #include "TankAlgorithm.h"
-#include "Tank.h"
-#include <memory>
+#include "Direction.h"
+#include "SatelliteView.h"
 #include <vector>
-#include <unordered_map>
+#include <utility>
 
 class MyPlayer : public Player {
 private:
@@ -15,9 +16,10 @@ private:
 
     struct TankInfo {
         int tankIndex;
-        int currShells;
-        Tank* tank; // not owned -> just a reference
-        std::unique_ptr<TankAlgorithm> algorithm;
+        std::pair<int, int> lastKnownPosition;
+        Direction direction;
+        int remainingShells;
+        bool isAlive = true;
     };
 
     std::vector<TankInfo> tanks;
@@ -25,9 +27,10 @@ private:
 public:
     MyPlayer(int playerIndex, size_t x, size_t y, size_t maxSteps, size_t numShells);
 
-    void addTank(int tankIndex, Tank* tank, std::unique_ptr<TankAlgorithm> algorithm);
+    void registerTank(int tankIndex);
+
+    void updateTankInfo(int tankIndex, const std::pair<int, int>& pos,
+                        Direction dir, int shells);
 
     void updateTankWithBattleInfo(TankAlgorithm& tankAlgorithm, SatelliteView& satellite_view) override;
-
-    TankAlgorithm* getTankAlgorithm(Tank* tank) const;
 };
