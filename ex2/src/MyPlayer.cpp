@@ -5,29 +5,101 @@
 MyPlayer::MyPlayer(int playerIndex, size_t x, size_t y, size_t maxSteps, size_t numShells)
     : playerIndex(playerIndex), maxSteps(maxSteps), numShells(numShells) , x(x), y(y) {}
 
-void MyPlayer::registerTank(int tankIndex) {
-    tanks.push_back({tankIndex, {0, 0}, Direction::Up, numShells, true});
-}
+void MyPlayer::updateTankWithBattleInfo(TankAlgorithm& algorithm, SatelliteView& satellite_view) {
 
-void MyPlayer::updateTankInfo(int tankIndex, const std::pair<int, int>& pos,
-                               Direction dir, int shells) {
-    for (auto& tank : tanks) {
-        if (tank.tankIndex == tankIndex) {
-            tank.lastKnownPosition = pos;
-            tank.direction = dir;
-            tank.remainingShells = shells;
-            return;
+    std::pair<int, int> selfPosition{-1, -1};
+    std::vector<std::pair<int, int>> enemyTanks;
+    std::vector<std::pair<int, int>> ownTanks;
+    std::vector<std::pair<int, int>> shells;
+    std::vector<std::pair<int, int>> walls;
+    std::vector<std::pair<int, int>> mines;
+
+    for (int i = 0; i < x; ++i) { // y is i x is j
+        for (int j = 0; j < y; ++j) {
+            char obj = satellite_view.getObjectAt(i, j);
+            std::pair<int, int> pos = {i, j};
+
+            switch (obj) {
+                case '%':
+                    selfPosition = pos;
+                    ownTanks.push_back(pos);
+                    break;
+                case '1':
+                    ownTanks.push_back(pos);
+                    break;
+                case '2':
+                    enemyTanks.push_back(pos);
+                    break;
+                case '*':
+                    shells.push_back(pos);
+                    break;
+                case '#':
+                    walls.push_back(pos);
+                    break;
+                case '@':
+                    mines.push_back(pos);
+                    break;
+                default:
+                    break;
+            }
         }
     }
-    throw std::runtime_error("Tank index not found in MyPlayer.");
+
+    if (selfPosition.first == -1)
+        throw std::runtime_error("Self position not found in SatelliteView");
+
+    // to change and get information from tankAlgorithm
+    Direction dir = Direction::Up; 
+    int shellsLeft = numShells; 
+
+    MyBattleInfo info(
+        playerIndex,
+        selfPosition,
+        dir,
+        shellsLeft,
+        maxSteps,
+        0,
+        enemyTanks,
+        ownTanks,
+        shells,
+        walls,
+        mines
+    );
+
+    algorithm.updateBattleInfo(info);
 }
 
-void MyPlayer::updateTankWithBattleInfo(TankAlgorithm& algorithm, SatelliteView& view) {
-    // ה-BattleInfo ייאסף מהטנק דרך GameManager, אז כאן אין עדכון
-    // זו קריאה חד-פעמית של השחקן לעדכן את האלגוריתם
-    // אין לנו דרך חוקית לזהות את הטנק המתאים מתוך הפונקציה הזאת לפי הכללים
+/**
+ * @brief Returns the player's ID.
+ */
+int MyPlayer::getId() const {
+    return playerIndex;
+}
 
-    // לכן, בשלב הזה, נשאיר את הפונקציה ריקה (אם לא נשתמש בה בפועל)
-    (void)algorithm;
-    (void)view;
+/**
+ * @brief Checks if player has any tanks left.
+ */
+bool MyPlayer::hasAliveTanks() const {
+    return numsTanks > 0;
+}
+
+/**
+ * @brief Returns the player's number of tanks.
+ */
+int MyPlayer::getNumTanks() const {
+    return numTanks;
+}
+
+/**
+ * @brief Sets the player's number of tanks.
+ */
+int MyPlayer::setNumTanks(size_t num) {
+    numTanks = num;
+}
+
+/**
+ * @brief "removes" a tank by lowering the num of tanks for a player.
+ */
+int MyPlayer::removeTank() {
+    numTanks = numTanks-1;
 }
