@@ -19,6 +19,7 @@
 #include "ActionRequestUtils.h"
 #include "MySatelliteView.h"
 #include "MyPlayer.h"
+#include "GameCell.h"
 
 class GameManager {
 public:
@@ -41,16 +42,15 @@ public:
 
 private:
     std::vector<std::unique_ptr<Shell>> shells;
-    std::vector<std::unique_ptr<Tank>> tanks;
     std::vector<std::unique_ptr<Player>> players;
-    std::vector<std::unique_ptr<TankAlgorithm>> algoTanks;
     std::map<std::pair<int, int>, std::vector<Entity*>> positionMap;
+    std::vector<std::pair<std::unique_ptr<Tank>, std::unique_ptr<TankAlgorithm>>> tankPerAlgoVector;
     int stepCounter = 0;
     std::unique_ptr<PlayerFactory> playerFactory;
     std::unique_ptr<TankAlgorithmFactory> tankFactory;
 
-    std::unique_ptr<Board> board;
-    //std::vector<int> playerTankCount = {0, 0};
+    std::unique_ptr<Board<GameCell>> board;
+    std::vector<int> playerTankCount;
 
     std::vector<std::string> inputErrors;
     std::ostream* outputLog = nullptr;
@@ -59,8 +59,8 @@ private:
     int drawCountdown = -1;
     int maxSteps = 0;
     int numShells = 0;
-    int rows = 0;
-    int cols = 0;
+    size_t rows = 0;
+    size_t cols = 0;
     int winner = -1; // 0 = tie, 1/2 = winner player
 
     void resetGameState();

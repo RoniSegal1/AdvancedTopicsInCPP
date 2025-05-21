@@ -1,5 +1,12 @@
 #include "GameManager.h"
 
+GameManager::GameManager(std::unique_ptr<PlayerFactory> playerFactory,
+                         std::unique_ptr<TankAlgorithmFactory> tankFactory)
+    : playerFactory(std::move(playerFactory)),
+      tankFactory(std::move(tankFactory)),
+      playerTankCount(2, 0)
+{}
+
 /**
  * @brief Reads and parses a board file, initializes the board and players.
  * @param fileName The name of the input file.
@@ -22,7 +29,7 @@ bool GameManager::readBoard(const std::string& fileName) {
 
     auto rawMap = readRawMap(file);
     normalizeRawMap(rawMap);
-    board = std::make_unique<Board>(cols, rows);
+    board = std::make_unique<Board<GameCell>>(cols, rows);
     placeTerrain(rawMap);
     placeTanks(rawMap);
     if (!inputErrors.empty()) {
@@ -48,10 +55,8 @@ void GameManager::run(){
         };
     }
     if (!won){
-        auto* myPlayer1 = dynamic_cast<MyPlayer*>(players[0].get());
-        auto* myPlayer2 = dynamic_cast<MyPlayer*>(players[1].get());
-        int tankPlayer1 = myPlayer1->getNumTanks();
-        int tankPlayer2 = myPlayer2->getNumTanks();
+        int tankPlayer1 = playerTankCount[0];
+        int tankPlayer2 = playerTankCount[1];
         if (outputLog) {
             *outputLog << "Tie, reached max steps = " << maxSteps
                     << ", player 1 has " << tankPlayer1
@@ -66,10 +71,11 @@ void GameManager::run(){
 */
 void GameManager::processTurn() {
     currentTurnActions.clear();
-    // Get next action for each tank from its algorithm and apply the actions
-    for (size_t i = 0; i < algoTanks.size(); ++i) {
-        TankAlgorithm* algot = algoTanks[i].get();
-        Tank* t = tanks[i].get();
+    // Get next action for each tank from its algorithm and apply the action
+
+    for (const auto& [tankPtr, algoPtr] : tankPerAlgoVector) {
+        Tank* t = tankPtr.get();
+        TankAlgorithm* algot = algoPtr.get();
 
         if (!t->getIsAlive()) {
             currentTurnActions.push_back("killed");
@@ -78,7 +84,7 @@ void GameManager::processTurn() {
 
         ActionRequest action = algot->getAction();
         currentTurnActions.push_back(toString(action));
-        applyAction(action, *t, *algot, i);
+        applyAction(action, *t, *algot, currentTurnActions.size() - 1);
     }
 
     // Move shells and resolve any resulting collisions
@@ -165,20 +171,20 @@ void GameManager::resolveCollisions() {
             }
         }
 
-        Cell& cell = board->getCell(pos.first, pos.second);
+        GameCell& cell = board->getCell(pos.first, pos.second);
         // Wall hit logic: 2 hits destroy the wall
-        if (cell.getTerrain() == TerrainType::Wall) {
+        if (cell.getContent() == CellContent::Wall) {
             cell.incrementWallHits();
             if (cell.getWallHits() >= 2) {
-                cell.resetWall();
+                cell.resetContent();
             }
             removeShells = true;
         }
         
         // Mine logic: destroy any tank stepping on a mine
-        if (cell.getTerrain() == TerrainType::Mine && !localTanks.empty()) {
+        if (cell.getContent() == CellContent::Mine && !localTanks.empty()) {
             removeTanks = true;
-            cell.resetMine();
+            cell.resetContent();
         }
 
         // Shell and tank at same location: both destroyed
@@ -238,9 +244,9 @@ void GameManager::resolveCollisions() {
 void GameManager::rebuildPositionMap() {
     positionMap.clear();
 
-    for (const auto& tankPtr : tanks) {
+    for (const auto& [tankPtr, _] : tankPerAlgoVector) {
         Tank* tank = tankPtr.get();
-        if (tank->getIsAlive()){
+        if (tank->getIsAlive()) {
             positionMap[tank->getPosition()].push_back(tank);
         }
     }
@@ -266,16 +272,14 @@ bool GameManager::checkWinConditions(){
         return true;
 
     case 1: {
-        auto* myPlayer = dynamic_cast<MyPlayer*>(players[0].get());
-        int tankPlayer = myPlayer->getNumTanks();
+        int tankPlayer = playerTankCount[0];
         if (outputLog)
             *outputLog << "Player 1 won with " << tankPlayer << " tanks still alive\n";
         return true;
     }
 
     case 2: {
-        auto* myPlayer = dynamic_cast<MyPlayer*>(players[1].get());
-        int tankPlayer = myPlayer->getNumTanks();
+        int tankPlayer = playerTankCount[1];
         if (outputLog)
             *outputLog << "Player 2 won with " << tankPlayer << " tanks still alive\n";
         return true;
@@ -284,18 +288,17 @@ bool GameManager::checkWinConditions(){
     default:
         return true;
     }
-    
-    bool HasNoAmmo = false;
-    for (const auto& tankPtr : tanks) {
-        const Tank* t = tankPtr.get();
-        if (t->getAmmo() > 0) {
-            HasNoAmmo = true;
+
+    bool hasAmmo = false;
+    for (const auto& [tankPtr, algoPtr] : tankPerAlgoVector) {
+        if (tankPtr->getIsAlive() && tankPtr->getAmmo() > 0){
+            hasAmmo = true;
             break;
         }
     }
 
     // Start draw countdown if both are out of ammo
-    if (!HasNoAmmo) {
+    if (!hasAmmo) {
         if (drawCountdown == -1) {
             drawCountdown = 40;
             if (maxSteps - stepCounter < 40) {
@@ -336,29 +339,23 @@ void GameManager::removeMarkedShells(const std::set<Shell*>& toRemove) {
  * @brief Removes all tanks marked for deletion.
  */
 void GameManager::removeMarkedTanks(const std::set<Tank*>& toRemove) {
-    for (Tank* tank : toRemove) {
-        tank->markAsDead();
+    size_t globalIndex = 0;
+
+    for (const auto& [tankPtr, algoPtr] : tankPerAlgoVector) {
+        Tank* tank = tankPtr.get();
         int id = tank->getPlayer();
 
-        auto it = std::find_if(tanks.begin(), tanks.end(), [&](const std::unique_ptr<Tank>& ptr) {
-            return ptr.get() == tank;
-        });
-        if (it != tanks.end()) {
-            size_t index = std::distance(tanks.begin(), it);
-            if (index < currentTurnActions.size()) {
-                currentTurnActions[index] += " (killed)";
+        if (toRemove.count(tank)){
+            tank->markAsDead();
+            playerTankCount[id - 1] -= 1;
+
+            if (globalIndex < currentTurnActions.size()) { 
+                currentTurnActions[globalIndex] += " (killed)";
             }
         }
-
-        auto* myPlayer = dynamic_cast<MyPlayer*>(players[id - 1].get());
-        if (myPlayer) {
-            myPlayer->removeTank();
-        }
+        globalIndex++;
     }
 }
-
-
-
 
 // ----------------------------------------------------------------
 //                  APPLY ACTION UTILITIES
@@ -521,35 +518,33 @@ bool GameManager::parseConfigLines(std::ifstream& file) {
 }
 
 void GameManager::normalizeRawMap(std::vector<std::string>& rawMap) {
-    while (rawMap.size() < static_cast<size_t>(rows))
+    while (rawMap.size() < rows)
         rawMap.emplace_back(cols, ' ');
-    if (rawMap.size() > static_cast<size_t>(rows))
+    if (rawMap.size() > rows)
         rawMap.resize(rows);
 
     for (std::string& row : rawMap) {
-        if (row.size() < static_cast<size_t>(cols)) row.resize(cols, ' ');
-        else if (row.size() > static_cast<size_t>(cols)) row = row.substr(0, cols);
+        if (row.size() < cols) row.resize(cols, ' ');
+        else if (row.size() > cols) row = row.substr(0, cols);
     }
 }
 
 void GameManager::placeTerrain(const std::vector<std::string>& rawMap) {
-    for (size_t y = 0; y < static_cast<size_t>(rows); ++y) {
-        for (size_t x = 0; x < static_cast<size_t>(cols); ++x) {
+    for (size_t y = 0; y < rows; ++y) {
+        for (size_t x = 0; x < cols; ++x) {
             char c = rawMap[y][x];
             if (c == '#')
-                board->getCell(x, y).setTerrain(TerrainType::Wall);
+                board->getCell(x, y).setContent(CellContent::Wall);
             else if (c == '@')
-                board->getCell(x, y).setTerrain(TerrainType::Mine);
+                board->getCell(x, y).setContent(CellContent::Mine);
         }
     }
 }
 
 
 void GameManager::placeTanks(const std::vector<std::string>& rawMap) {
-    std::vector<int> playerTankCount(2, 0);
-
-    for (size_t y = 0; y < static_cast<size_t>(rows); ++y) {
-        for (size_t x = 0; x < static_cast<size_t>(cols); ++x) {
+    for (size_t y = 0; y < rows; ++y) {
+        for (size_t x = 0; x < cols; ++x) {
             char c = rawMap[y][x];
 
             if (std::isdigit(c)) {
@@ -576,8 +571,7 @@ void GameManager::placeTanks(const std::vector<std::string>& rawMap) {
                 auto algorithm = tankFactory->create(playerIndex, playerTankCount[playerIndex - 1]);
 
                 // add to all relevent places
-                tanks.push_back(std::move(tank));
-                algoTanks.push_back(std::move(algorithm));
+                tankPerAlgoVector.emplace_back(std::move(tank), std::move(algorithm));
                 positionMap[{x, y}].push_back(tankPtr);
 
                 // update the tank count
@@ -585,15 +579,6 @@ void GameManager::placeTanks(const std::vector<std::string>& rawMap) {
             }
         }
     }
-    if (players[0]) {
-        auto* myPlayer0 = dynamic_cast<MyPlayer*>(players[0].get());
-        if (myPlayer0) myPlayer0->setNumTanks(playerTankCount[0]);
-    }
-    if (players[1]) {
-        auto* myPlayer1 = dynamic_cast<MyPlayer*>(players[1].get());
-        if (myPlayer1) myPlayer1->setNumTanks(playerTankCount[1]);
-    }
-
 }
 
 
@@ -602,13 +587,13 @@ void GameManager::determineWinner() {
     bool p1_dead = !players[1];
 
     if (!p0_dead) {
-        auto* myPlayer0 = dynamic_cast<MyPlayer*>(players[0].get());
-        p0_dead = !myPlayer0 || !myPlayer0->hasAliveTanks();
+        auto* Player0 = players[0].get();
+        p0_dead = !Player0 || playerTankCount[0] == 0;
     }
 
     if (!p1_dead) {
-        auto* myPlayer1 = dynamic_cast<MyPlayer*>(players[1].get());
-        p1_dead = !myPlayer1 || !myPlayer1->hasAliveTanks();
+        auto* Player1 = players[1].get();
+        p1_dead = !Player1 || playerTankCount[1] == 0;
     }
 
     if (p0_dead && p1_dead) {

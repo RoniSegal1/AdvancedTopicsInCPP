@@ -14,27 +14,28 @@
 
 בתחילת התור
 
-1. add serial number for Tank (starting from 0, for each player), update GameManager as well if needed.
-2. extract GameManager outside functions
+1. add serial number for Tank (starting from 0, for each player), update GameManager as well if needed. ✅
+2. extract GameManager outside functions ‼️
 4. add a function to Player which returns haw many tanks it has.
-   or think of an alternative for GameManager to know the above.
-5. add main.cpp
-6. add BattleInfo and check the update battleInfo for the TankAlgorithm
-7. check if all tanks are out of ammo and turn to 40 steps is still requirement in this task
-9. sync between tanks, tankAlgos, actions in GameManager.
+   change it to work with playerTankCount✅
+5. add main.cpp‼️
+17. handle size_t in board and gameManager ✅
+6. add BattleInfo and the updatebattleInfo for the TankAlgorithm‼️
+18. Check whether ApplyAction can be modified because of new data structure in GameManager‼️
+9. mutual vector between tanks, tankAlgos in GameManager. ‼️
 10. consider adding Tank a field: idByPlayer / idInGeneral so we can ommit i from GameManager - much cleaner!
-    if so, clean the function RemoveTanks as well pleaseeeeeeee :)
-11. UNIQUE_PTR fr Tank?
-12. each player creates it's own board - as updated as he knows
+    if so, clean the function RemoveTanks as well please ‼️
+19. Handle TerrainType in GameManager✅
+12. each player creates it's own board - as updated as he knows- create a base class for cell, and adjust it for the gamemanager and player✅
+7. check if all tanks are out of ammo and turn to 40 steps is still requirement in this task - to ask in the forum
+   update according to the answer in the forum 🕵️ 
+8. can a Tank ask to get Info while in backward delay? update according to the answer in the forum 🕵️ 
+13. can i write additional stuff to the outputlog? for example ""Both players out of shells. Starting 40-turn countdown."  update according to the answer in the forum 🕵️ 
+15. Can TankAlgorithm keep its own instance of board with its self upddated information? 🧠🕵️
 
-
-
-
-3. Does GameManager decides which Algorithm each Tank gets?
-   Shouldn't it be the Player who decides?
-8. can a Tank ask to get Info while in backward delay?
-13. can i write additional stuff to the outputlog? for example ""Both players out of shells. Starting 40-turn countdown." 
-** can we downcast to myPlayer in GameManager?
-14. Can we make each TankAlgorithm at it's own turn ask for battleInfo?
-15. can a player can keep its own instance of board with its self upddated information? can TankAlgorithm do it too?
-if so, in every cell can i keep also instaces of tanks? shells? isnt it too heavy?
+3. Does GameManager decides which Algorithm each Tank gets? yes
+   Shouldn't it be the Player who decides? no
+   for every player, each tank has the same Algorithm
+16. can we downcast to myPlayer in GameManager? no!!! impossible!
+19. we can assume a tank can know its direction at the start of the game
+14. How can we make each TankAlgorithm at it's own turn ask for battleInfo? 🧠
