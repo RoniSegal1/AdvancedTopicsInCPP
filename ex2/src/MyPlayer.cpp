@@ -14,7 +14,7 @@ void MyPlayer::updateTankWithBattleInfo(TankAlgorithm& algorithm, SatelliteView&
     std::vector<std::pair<int, int>> walls;
     std::vector<std::pair<int, int>> mines;
 
-    for (int i = 0; i < x; ++i) { // y is i x is j
+    for (int i = 0; i < x; ++i) {
         for (int j = 0; j < y; ++j) {
             char obj = satellite_view.getObjectAt(i, j);
             std::pair<int, int> pos = {i, j};

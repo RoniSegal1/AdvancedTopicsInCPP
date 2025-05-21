@@ -38,9 +38,25 @@ bool GameManager::readBoard(const std::string& fileName) {
  * Advances the game turn-by-turn until a win condition or maximum turn limit is reached.
  */
 void GameManager::run(){
+    bool won = false;
+    // TODO: add what would happen if the game finished 
     while (true && stepCounter < maxSteps) {
         processTurn();
-        if (checkWinConditions()) break;
+        if (checkWinConditions()) {
+            won = true;
+            break;
+        };
+    }
+    if (!won){
+        auto* myPlayer1 = dynamic_cast<MyPlayer*>(players[0].get());
+        auto* myPlayer2 = dynamic_cast<MyPlayer*>(players[1].get());
+        int tankPlayer1 = myPlayer1->getNumTanks();
+        int tankPlayer2 = myPlayer2->getNumTanks();
+        if (outputLog) {
+            *outputLog << "Tie, reached max steps = " << maxSteps
+                    << ", player 1 has " << tankPlayer1
+                    << " tanks, player 2 has " << tankPlayer2 << " tanks\n";
+        }
     }
 }
 
@@ -246,17 +262,25 @@ bool GameManager::checkWinConditions(){
         return false;
 
     case 0:
-        if (outputLog) *outputLog << "Tie! Both tanks destroyed.\n";
+        if (outputLog) *outputLog << "Tie, both players have zero tanks\n";
         return true;
 
-    case 1:
-        if (outputLog) *outputLog << "Player 1 wins! Player 2 destroyed.\n";
+    case 1: {
+        auto* myPlayer = dynamic_cast<MyPlayer*>(players[0].get());
+        int tankPlayer = myPlayer->getNumTanks();
+        if (outputLog)
+            *outputLog << "Player 1 won with " << tankPlayer << " tanks still alive\n";
         return true;
+    }
 
-    case 2:
-        if (outputLog) *outputLog << "Player 2 wins! Player 1 destroyed.\n";
+    case 2: {
+        auto* myPlayer = dynamic_cast<MyPlayer*>(players[1].get());
+        int tankPlayer = myPlayer->getNumTanks();
+        if (outputLog)
+            *outputLog << "Player 2 won with " << tankPlayer << " tanks still alive\n";
         return true;
-    
+    }
+
     default:
         return true;
     }
@@ -274,16 +298,17 @@ bool GameManager::checkWinConditions(){
     if (!HasNoAmmo) {
         if (drawCountdown == -1) {
             drawCountdown = 40;
-            if (maxSteps - stepCounter < 40){
+            if (maxSteps - stepCounter < 40) {
                 if (outputLog) *outputLog << "Both players out of shells.\n";
             }
-            else{
+            else {
                 if (outputLog) *outputLog << "Both players out of shells. Starting 40-turn countdown.\n";
             }
         } else {
             drawCountdown--;
             if (drawCountdown == 0) {
-                if (outputLog) *outputLog << "Tie! 40 steps passed with no winner.\n";
+                // TODO: finish what needs to be written
+                if (outputLog) *outputLog << "Tie, reached 40-turn countdown, player 1 has <X> tanks, player 2 has <Y> tanks\n";
                 return true;
             }
         }
