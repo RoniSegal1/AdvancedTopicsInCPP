@@ -33,9 +33,29 @@
 13. can i write additional stuff to the outputlog? for example ""Both players out of shells. Starting 40-turn countdown."  update according to the answer in the forum 🕵️ 
 15. Can TankAlgorithm keep its own instance of board with its self upddated information? 🧠🕵️
 
+20. ask in forum whether a player can send an Action for tankAlgorithm to perform 🕵️‼️
+כלומר האם אפשר שהפלייר יכתיב לטנקים את הפעולות, והאלגוריתמים רק ידאגו לבצע אותם?
+21. האם אלגוריתם אחד יכול להפעיל פעולות מאלגוריתם אחר בתנאי שקיימת מחלקת קומון? 🕵️‼️
+22. האם עליי לחשוב על סיבוכיות זמן ריצה בתכנון טנק אלגוריתם? 🕵️‼️
 3. Does GameManager decides which Algorithm each Tank gets? yes
    Shouldn't it be the Player who decides? no
    for every player, each tank has the same Algorithm
 16. can we downcast to myPlayer in GameManager? no!!! impossible!
 19. we can assume a tank can know its direction at the start of the game
 14. How can we make each TankAlgorithm at it's own turn ask for battleInfo? 🧠
+
+אלגוריתם לטנקים:
+1. אלגוריתם בייסיק כמו במטלה הקודמת
+שפצור לחיפוש טילים ברדיוס 4 ממני
+אם קיים טיל כזה, לנסות לירות לכיוון שלו
+להניח שהטיל מתקדם לכיווני
+2. הפעולה הראשונה חייבת להיות גט באטל אינפו
+3. מבצע גט באטל אינפו כל 4\2 תורות, להחליט לפי סימולציה
+4. לתעדף את בייסיק מוב על פני גט באטל אינפו
+5. כל עוד בייסיק מובז מחזיר ווייט לתעדף גט באטל אינפו
+
+6. הפלייר מכתיב לטנק אלגוריתם אחרי איזה טנק לרדוף בהנחה שהטנק ביקש גט באטל אינפו
+7. אם המיקום שהפלייר שלח לי לרדוף אחריו שונה מהמיקום האחרון לעשות ביאפאס חדש
+8. אם הטנק כבר הגיע למיקום של המטרה, שיבקש גט באטל אינפו כלומר אחרי מי לרדוף עכשיו
+
+9. להכליל באלגוריתמים את קבלת המידע עם גט באטל אינפו וחלוקה לתתי פונקציות קטנות
