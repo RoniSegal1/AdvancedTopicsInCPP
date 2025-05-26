@@ -2,6 +2,51 @@
 #include "Board.h"
 #include "Cell.h"
 
+
+void updatePostAction(ActionRequest action) {
+    switch (action) {
+        case ActionRequest::MoveForward:
+            myPosition = moveInDirection(myPosition.first, myPosition.second, myDirection);
+            break;
+        case ActionRequest::RotateLeft90:
+            myDirection = (myDirection);
+            break;
+        case ActionRequest::RotateRight90:
+            myDirection = turnRightQuarter(myDirection);
+            break;
+        case ActionRequest::RotateLeft45:
+            myDirection = turnLeft(myDirection);
+            break;
+        case ActionRequest::RotateRight45:
+            myDirection = turnRight(myDirection);
+            break;
+    }
+}
+
+void updateBoard(Board<PlayerCell> board, BattleInfo& info){
+    
+}
+
+/**
+ * @brief Moves one step in the given direction with wrapping.
+ */
+std::pair<int, int> moveInDirection(int x, int y, Direction dir) {
+    std::pair<int, int> next;
+    switch (dir) {
+        case Direction::U:         next = { x, y - 1 }; break;
+        case Direction::UR:        next = { x + 1, y - 1 }; break;
+        case Direction::R:         next = { x + 1, y }; break;
+        case Direction::DR:        next = { x + 1, y + 1 }; break;
+        case Direction::D:         next = { x, y + 1 }; break;
+        case Direction::DL:        next = { x - 1, y + 1 }; break;
+        case Direction::L:         next = { x - 1, y }; break;
+        case Direction::UL:        next = { x - 1, y - 1 }; break;
+    }
+    board.wrapPosition(next.first, next.second); // wrap around board edges
+    return next;
+}
+
+
 /**
  * @brief Returns the 3x3 neighborhood deltas including center.
  */

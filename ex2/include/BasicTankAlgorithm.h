@@ -2,6 +2,7 @@
 
 #include "MyTankAlgorithm.h"
 #include "Board.h"
+#include "Direction.h"
 #include "PlayerCell.h"
 #include <optional>
 
@@ -10,6 +11,8 @@ private:
     int turnsSinceLastUpdate;
     std::optional<Board<PlayerCell>> lastBoard; // change the name of the cell type
 
+    // אם יש טנק לירות
+    // להעביר את THRET למיי אלגוריתם
     ActionRequest getThreatningNextAction();
     ActionRequest getScaryNextAction();
 

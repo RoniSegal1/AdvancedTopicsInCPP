@@ -32,6 +32,7 @@
 8. can a Tank ask to get Info while in backward delay? update according to the answer in the forum 🕵️ 
 13. can i write additional stuff to the outputlog? for example ""Both players out of shells. Starting 40-turn countdown."  update according to the answer in the forum 🕵️ 
 15. Can TankAlgorithm keep its own instance of board with its self upddated information? 🧠🕵️
+22. האם צריך לממש רול אוף 5 ביורשים של MyTankAlgorithm 🕵️ ‼️
 
 20. ask in forum whether a player can send an Action for tankAlgorithm to perform 🕵️‼️
 כלומר האם אפשר שהפלייר יכתיב לטנקים את הפעולות, והאלגוריתמים רק ידאגו לבצע אותם?
@@ -59,3 +60,4 @@
 8. אם הטנק כבר הגיע למיקום של המטרה, שיבקש גט באטל אינפו כלומר אחרי מי לרדוף עכשיו
 
 9. להכליל באלגוריתמים את קבלת המידע עם גט באטל אינפו וחלוקה לתתי פונקציות קטנות
+10. לפני שמחזירים Action, לעדכן איך היא משפיעה על הטנק מבחינת הידע של האלגוריתם

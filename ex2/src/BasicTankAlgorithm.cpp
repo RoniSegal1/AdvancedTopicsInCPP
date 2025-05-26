@@ -27,6 +27,88 @@ ActionRequest BasicTankAlgorithm::shouldGetBattleInfo() const {
     return ActionRequest::GetBattleInfo;
 }
 
+ActionRequest BasicTankAlgorithm::getThreatningNextAction() const {
+    if (!canMoveForward()) {
+        return ActionRequest::DoNothing;
+    }
+    for (int i = 0; i < 2; i++){
+        ActionRequest act = MoveifShellsInRange(i);
+        if (act == ActionRequest::MoveForward){
+            ActionRequest::MoveForward;
+        }
+    }
+    Direction dir = direction;
+    auto [x, y] = position;
+    auto [dx, dy] = getDelta(dir);
+    for (int j = 0; j < 2; j++) {
+        x += dx;
+        y += dy;
+        lastBoard->wrapPosition(x, y);
+        const PlayerCell& cell = lastBoard->getCell(x, y);
+        if (cell.getContent() == CellContent::EnemyTank) {
+            return ActionRequest::Shoot;
+        }
+    }
+    return ActionRequest::DoNothing;
+}
+
+ActionRequest BasicTankAlgorithm::getScaryNextAction() const {
+
+
+
+
+
+    if (!canMoveForward()) {
+        return ActionRequest::DoNothing;
+    }
+
+    for (int i = 0; i < 2; i++){
+        ActionRequest act = MoveifShellsInRange(i);
+        if (act == ActionRequest::MoveForward){
+            ActionRequest::MoveForward;
+        }
+    }
+
+    Direction dir = direction;
+    auto [x, y] = position;
+    auto [dx, dy] = getDelta(dir);
+
+    for (int j = 0; j < 2; j++) {
+        x += dx;
+        y += dy;
+        lastBoard->wrapPosition(x, y);
+        const PlayerCell& cell = lastBoard->getCell(x, y);
+        if (cell.getContent() == CellContent::EnemyTank) {
+            return ActionRequest::Shoot;
+        }
+    }
+
+    return ActionRequest::DoNothing;
+}
+
+ActionRequest BasicTankAlgorithm::MoveifShellsInRange(i) const{
+    auto [x, y] = position;
+    const auto& board = *lastBoard;
+    auto vicinity = doDVicinity(x, y, distance, board);
+    for (const auto& [sx, sy] : vicinity) {
+        const PlayerCell& cell = board.getCell(sx, sy);
+        if (cell.getContent() == CellContent::Shell) {
+            return ActionRequest::MoveForward;
+        }
+    }
+    return ActionRequest::DoNothing;
+}
+
+bool BasicTankAlgorithm::canMoveForward() const{
+    auto dir = getMyDirection();
+    auto [sx, sy] = [x, y] + direction.getDelta(dir);
+    const Cell& neighbor = board.getCell(sx, sy);
+    TerrainType terrain = neighbor.getTerrain();
+    if (terrain == TerrainType::Empty) {
+            return True;
+    }
+    return False;
+}
 
 
 
