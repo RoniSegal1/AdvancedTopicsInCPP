@@ -8,17 +8,12 @@
 
 class BasicTankAlgorithm : public MyTankAlgorithm {
 private:
-    int turnsSinceLastUpdate;
-    std::optional<Board<PlayerCell>> lastBoard; // change the name of the cell type
-
-    // אם יש טנק לירות
-    // להעביר את THRET למיי אלגוריתם
-    ActionRequest getThreatningNextAction();
     ActionRequest getScaryNextAction();
 
+    std::vector<std::pair<int, int>> getCurrThreatShells();
     ActionRequest shouldGetBattleInfo() const;
     bool detectThreateningShell();
-    bool hasBoard() const { return lastBoard.has_value(); }
+    
 
 public:
     BasicTankAlgorithm(int playerIndex, int tankIndex);

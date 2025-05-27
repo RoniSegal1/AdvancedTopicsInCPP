@@ -1,11 +1,12 @@
 #include "ChasingTankAlgorithm.h"
 
 void ChasingTankAlgorithm::updateBattleInfo(BattleInfo& info){
-    myPosition = info.getMyPosition();
-    myDirection = info.getMyDirection();
+    myinfo = static_cast<MyBattleInfo&>(info);
+    myPosition = myinfo.getMyPosition();
     lastEnemyPosition = enemyPosition;
-    enemyPosition = info.getEnemyPosition();
-    board = updateBoard(info);
+    enemyPosition = myinfo.getEnemyPosition();
+    shellsPositions = myinfo.getShellsPositions(); // הוספתי כי זה חלק מהTHREAT :)
+    updateBoard(info);
 }
 
 /**
@@ -14,7 +15,8 @@ void ChasingTankAlgorithm::updateBattleInfo(BattleInfo& info){
 ActionRequest ChasingTankAlgorithm::getAction() {
 
     // Try to take a basic safe action first (like moving away from a shell)
-    ActionRequest action = getThreatningNextAction(); // TODO: maybe different name
+    auto threatingShells = getCurrThreatShells();
+    ActionRequest action = getThreatningNextAction(threatingShells); // TODO: maybe different name
     if (action != ActionRequest::DoNothing) {
         updatePostAction(action);
         return action; // If a valid basic move exists, take it immediately
