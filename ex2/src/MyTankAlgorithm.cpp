@@ -1,6 +1,14 @@
 #include "MyTankAlgorithm.h"
-#include "MyBattleInfo.h"
 
+MyTankAlgorithm::MyTankAlgorithm(int playerIndex, int tankIndex)
+    : playerIndex(playerIndex),
+      tankIndex(tankIndex),
+      myPosition({-1, -1}),
+      myDirection(playerIndex == 1 ? Direction::L : Direction::R),
+      turnsSinceLastUpdate(0) // TODO: check if needed here. only Basic uses?
+{
+    // אפשרות לאתחול עתידי נוסף אם צריך
+}
 
 
 void MyTankAlgorithm::updatePostAction(ActionRequest action) {
@@ -26,19 +34,9 @@ void MyTankAlgorithm::updatePostAction(ActionRequest action) {
     }
 }
 
-void MyTankAlgorithm::updateBoard(BattleInfo& info){
-    MyBattleInfo* myinfo = dynamic_cast<MyBattleInfo*>(&info);
-    if (!myinfo) return;
-
-    boardRows = myinfo->getBoardRows();
-    boardCols = myinfo->getBoardCols();
-    board = Board<PlayerCell>(boardRows, boardCols);
-    for (int i = 0; i < boardRows; ++i) {
-        for (int j = 0; j < boardCols; ++j) {
-            CellContent content = myinfo->getCellContent(i, j);
-            board.setCell(i, j, PlayerCell(i, j, content));
-        }
-    }
+void MyTankAlgorithm::updateGrid(BattleInfo& info){
+    // TODO: לעדכן אחרי בניית באטל אינפו
+    // לעדכן גם רוחב ואורך
 }
 
 /**
@@ -56,63 +54,110 @@ std::pair<int, int> MyTankAlgorithm::moveInDirectionD(int x, int y, int d, Direc
         case Direction::L:         next = { x - 1*d, y }; break;
         case Direction::UL:        next = { x - 1*d, y - 1*d }; break;
     }
-    board.wrapPosition(next.first, next.second); // wrap around board edges
+    wrapPosition(next.first, next.second); // wrap around edges
     return next;
 }
 
 
 /**
- * @brief Returns the 3x3 neighborhood deltas including center.
+ * @brief Core logic deciding whether to move, shoot, or wait.
+ * 
+ * First checks if the tank is standing in a danger zone.
+ * If yes, attempts to move to a safer location.
+ * Otherwise, considers shooting if an enemy is in sight.
  */
-const std::vector<std::pair<int, int>> MyTankAlgorithm::getXDeltas(int x) const {
-    return {
-        {x * -1, x * -1}, {0, x * -1}, {x, x * -1},
-        {x * -1, 0},                   {x, 0},
-        {x * -1, x},      {0, x},      {x, x}
-    };
+ActionRequest MyTankAlgorithm::getThreatningNextAction(std::set<std::pair<int, int>> threatPlaces) {
+    auto act = ActionRequest::DoNothing;
+
+    int x = myPosition.first;
+    int y = myPosition.second;
+
+    // If we're currently standing in a danger zone, try to escape
+    if (threatPlaces.count({x, y}) == 1) {
+        act = MoveTankFromDanger(threatPlaces);
+    }
+
+    // If we chose to stay, maybe we can shoot instead
+    if (act == ActionRequest::DoNothing) {
+        act = CheckIfINeedToShootX(2);
+    }
+
+    return act;
 }
 
 /**
- * @brief Computes all surrounding coordinates (including self).
+ * @brief Attempts to move the tank away from danger, either forward or backward.
  */
-std::set<std::pair<int, int>> MyTankAlgorithm::doDVicinity(int x, int y, int d) const {
-    auto deltas = getXDeltas(d);
-    std::set<std::pair<int, int>> vicinity;
-    for (const auto& [dx, dy] : deltas) {
-        int nx = x + dx;
-        int ny = y + dy;
-        board.wrapPosition(nx, ny);
-        vicinity.insert({nx, ny});
-    }
-    return vicinity;
-}
-
-
-// basic movement algorithm 
-ActionRequest MyTankAlgorithm::getThreatningNextAction(threatingShells) const {
+ActionRequest MyTankAlgorithm::MoveTankFromDanger(std::set<std::pair<int, int>> threatPlaces) {
     Direction dir = myDirection;
     auto [dx, dy] = getDelta(dir);
     int x = myPosition.first;
     int y = myPosition.second;
-    if (canMoveThere(x+dx, y+dy) && threatingShells.count({x, y}) == 1) {
+
+    // Try moving forward if the next cell is safe
+    int newX = x + dx;
+    int newY = x + dy;
+    if (threatPlaces.count({newX, newY}) == 0) {
         return ActionRequest::MoveForward;
-    }
-    for (int j = 1; j <= 2; j++) {
-        int sx = x + j * dx;
-        int sy = y + j * dy;
-        board.wrapPosition(sx, sy);
-        const PlayerCell& cell = board.getCell(sx, sy);
-        if (cell.getContent() == CellContent::EnemyTank) {
-            return ActionRequest::Shoot;
+    } else {
+        // If not, try moving backward
+        int oldX = x - dx;
+        int oldY = x - dy;
+        if (threatPlaces.count({oldX, oldY}) == 0) {
+            return ActionRequest::MoveBackward;
         }
     }
     return ActionRequest::DoNothing;
 }
 
-bool MyTankAlgorithm::canMoveThere(int sx, int sy) const {
-    if (board.getWidth() == 0 || board.getHeight() == 0) return false;
-    const PlayerCell& neighbor = board.getCell(sx, sy);
-    return neighbor.getContent() == CellContent::Empty;
+/**
+ * @brief Checks if the tank should fire at an enemy tank in its line of sight.
+ */
+ActionRequest MyTankAlgorithm::CheckIfINeedToShootX(int x) {
+    Direction dir = myDirection;
+    auto [dx, dy] = getDelta(dir);
+    int newX = myPosition.first;
+    int newY = myPosition.second;
+
+    // Look ahead up to x steps
+    for (int step = 1; step <= x; ++step) {
+        newX += dx;
+        newY += dy;
+        wrapPosition(newX, newY);
+        auto content = grid[ny][nx];
+        // If we hit a wall, line of sight is blocked
+        if (cell.getContent() == CellContent::Wall) {
+            break;
+        }
+        if (cell.getContent() == CellContent::EnemyTank) {
+            ActionRequest::Shoot;
+        }
+    }
+    return ActionRequest::DoNothing;
+}
+
+std::set<std::pair<int, int>> MyTankAlgorithm::getThreatsAroundMe(){
+    auto shells = getCurrThreatShells();
+    auto cells = getThreatCellsAroundMe();
+    shells.insert(cells.begin(), cells.end());
+    return shells;
+}
+
+std::set<std::pair<int, int>> MyTankAlgorithm::getThreatCellsAroundMe() const {
+    int x = myPosition.first;
+    int y = myPosition.second;
+    std::set<std::pair<int, int>> threatPlaces;
+    auto vicinity = doDVicinity(x, y, 1);
+    for (const auto& pos : vicinity) {
+        int nx = pos.first;
+        int ny = pos.second;
+        wrapPosition(nx, ny);
+        auto content = grid[ny][nx]
+        if (content == ObjectType::Wall || content == ObjectType::Mine || content == ObjectType::AllyTank || content == ObjectType::EnemyTank) {
+            threatPlaces.insert({nx, ny});
+        }
+    }
+    return threatPlaces;
 }
 
 std::set<std::pair<int, int>> MyTankAlgorithm::getCurrThreatShells() {
@@ -123,7 +168,43 @@ std::set<std::pair<int, int>> MyTankAlgorithm::getCurrThreatShells() {
         int stepsFirstCell = stepsSecondCell - 1; // first cell is one step behind the second cell
         auto currScaryStepOne = doDVicinity(x, y, stepsFirstCell);
         auto currScaryStepTwo = doDVicinity(x, y, stepsSecondCell);
-        threatShells.insert(threatShells.end(), currScaryStepOne.begin(), currScaryStepOne.end());
-        threatShells.insert(threatShells.end(), currScaryStepTwo.begin(), currScaryStepTwo.end());
+        threatShells.insert(currScaryStepOne.begin(), currScaryStepOne.end());
+        threatShells.insert(currScaryStepTwo.begin(), currScaryStepTwo.end());
     }
+    return threatShells;
+}
+
+
+/**
+ * @brief Returns the 3x3 neighborhood deltas including center.
+ */
+std::vector<std::pair<int, int>> MyTankAlgorithm::getXDeltas(int x) const {
+    return {
+        {x * -1, x * -1}, {0, x * -1}, {x, x * -1},
+        {x * -1, 0},                   {x, 0},
+        {x * -1, x},      {0, x},      {x, x}
+    };
+}
+
+/**
+ * @brief Computes all surrounding coordinates (including self).
+ */
+std::set<std::pair<int, int>> MyTankAlgorithm::doDVicinity(int x, int y, int d) const{
+    auto deltas = getXDeltas(d);
+    std::set<std::pair<int, int>> vicinity;
+    for (const auto& [dx, dy] : deltas) {
+        int nx = x + dx;
+        int ny = y + dy;
+        wrapPosition(nx, ny);
+        vicinity.insert({nx, ny});
+    }
+    return vicinity;
+}
+
+/**
+ * @brief Wraps coordinates if they go beyond the limits.
+ */
+void MyTankAlgorithm::wrapPosition(int& x, int& y) const {
+    x = (x + width) % width;
+    y = (y + height) % height;
 }

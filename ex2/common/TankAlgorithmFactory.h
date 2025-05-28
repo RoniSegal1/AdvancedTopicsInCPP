@@ -1,3 +1,6 @@
+#pragma once
+#include <memory>
+
 class TankAlgorithmFactory {
 public:
 	virtual ~TankAlgorithmFactory() {}

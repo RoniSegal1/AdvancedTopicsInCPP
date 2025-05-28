@@ -1,6 +1,4 @@
 #include "MyPlayer.h"
-#include "MyBattleInfo.h"
-#include <stdexcept>
 
 MyPlayer::MyPlayer(int playerIndex, size_t x, size_t y, size_t maxSteps, size_t numShells)
     : playerIndex(playerIndex), maxSteps(maxSteps), numShells(numShells) , x(x), y(y) {}
@@ -8,62 +6,47 @@ MyPlayer::MyPlayer(int playerIndex, size_t x, size_t y, size_t maxSteps, size_t 
 void MyPlayer::updateTankWithBattleInfo(TankAlgorithm& algorithm, SatelliteView& satellite_view) {
 
     std::pair<int, int> selfPosition{-1, -1};
-    std::vector<std::pair<int, int>> enemyTanks;
-    std::vector<std::pair<int, int>> ownTanks;
-    std::vector<std::pair<int, int>> shells;
-    std::vector<std::pair<int, int>> walls;
-    std::vector<std::pair<int, int>> mines;
+    std::pair<int, int> enemyPosition{-1, -1};
+    std::set<std::pair<int, int>> shells;
+    std::vector<std::vector<ObjectType>> grid;
 
     for (int i = 0; i < x; ++i) {
         for (int j = 0; j < y; ++j) {
             char obj = satellite_view.getObjectAt(i, j);
             std::pair<int, int> pos = {i, j};
-
             switch (obj) {
                 case '%':
                     selfPosition = pos;
-                    ownTanks.push_back(pos);
+                    grid[y][x] = ObjectType::AllyTank;
                     break;
                 case '1':
-                    ownTanks.push_back(pos);
+                    grid[y][x] = ObjectType::AllyTank;
                     break;
                 case '2':
-                    enemyTanks.push_back(pos);
+                    grid[y][x] = ObjectType::EnemyTank;
                     break;
                 case '*':
-                    shells.push_back(pos);
+                    grid[y][x] = ObjectType::Shell;
+                    shells.insert(pos);
                     break;
                 case '#':
-                    walls.push_back(pos);
+                    grid[y][x] = ObjectType::Wall;
                     break;
                 case '@':
-                    mines.push_back(pos);
+                    grid[y][x] = ObjectType::Mine;
                     break;
                 default:
+                    grid[y][x] = ObjectType::Empty;
                     break;
             }
         }
     }
 
-    if (selfPosition.first == -1)
-        throw std::runtime_error("Self position not found in SatelliteView");
-
-    // to change and get information from tankAlgorithm
-    Direction dir = Direction::Up; 
-    int shellsLeft = numShells; 
-
     MyBattleInfo info(
-        playerIndex,
+        grid,
         selfPosition,
-        dir,
-        shellsLeft,
-        maxSteps,
-        0,
-        enemyTanks,
-        ownTanks,
+        enemyPosition,
         shells,
-        walls,
-        mines
     );
 
     algorithm.updateBattleInfo(info);
@@ -76,30 +59,6 @@ int MyPlayer::getId() const {
     return playerIndex;
 }
 
-/**
- * @brief Checks if player has any tanks left.
- */
-bool MyPlayer::hasAliveTanks() const {
-    return numsTanks > 0;
-}
-
-/**
- * @brief Returns the player's number of tanks.
- */
-int MyPlayer::getNumTanks() const {
-    return numTanks;
-}
-
-/**
- * @brief Sets the player's number of tanks.
- */
-int MyPlayer::setNumTanks(size_t num) {
-    numTanks = num;
-}
-
-/**
- * @brief "removes" a tank by lowering the num of tanks for a player.
- */
-int MyPlayer::removeTank() {
-    numTanks = numTanks-1;
-}
+// std::pair<int, int> MyPlayer::findEnemyTank(std::vector<std::vector<Objects>> grid, int myPlayerIndex) {
+//     // TODO : YUVAL
+// }

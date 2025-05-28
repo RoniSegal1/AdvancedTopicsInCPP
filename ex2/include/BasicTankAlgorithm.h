@@ -4,16 +4,14 @@
 #include "Board.h"
 #include "Direction.h"
 #include "PlayerCell.h"
-#include <optional>
 
 class BasicTankAlgorithm : public MyTankAlgorithm {
 private:
-    ActionRequest getScaryNextAction();
+    ActionRequest getScaryNextAction(std::set<std::pair<int, int>> threatPlaces);
 
-    std::vector<std::pair<int, int>> getCurrThreatShells();
-    ActionRequest shouldGetBattleInfo() const;
-    bool detectThreateningShell();
-    
+    ActionRequest BasicTankAlgorithm::rotateToFreeCell(std::set<std::pair<int, int>> threatPlaces);
+    ActionRequest shouldGetBattleInfo();
+    bool BasicTankAlgorithm::isEmpty() const;
 
 public:
     BasicTankAlgorithm(int playerIndex, int tankIndex);

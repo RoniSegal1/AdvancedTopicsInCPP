@@ -44,10 +44,10 @@ std::string Tank::getType() const {
 /**
  * @brief Moves the tank forward in its current direction, if the next cell is not a wall.
  */
-void Tank::moveForward(const Board& board) {
+void Tank::moveForward(const Board<GameCell>& board) {
     auto [newX, newY] = getNextPosition(board);
     const Cell& cell = board.getCell(newX, newY);
-    if (cell.getTerrain() != TerrainType::Wall) {
+    if (cell.getContent() != CellContent::Wall) {
         setPosition(newX, newY);
     }
 }
@@ -156,10 +156,10 @@ void Tank::resetBackwardDelay() {
 /**
  * @brief Moves the tank backward if the previous cell is not a wall.
  */
-void Tank::moveBackward(const Board& board) {
+void Tank::moveBackward(const Board<GameCell>& board) {
     auto [newX, newY] = getPrevPosition(board);
     const Cell& cell = board.getCell(newX, newY);
-    if (cell.getTerrain() != TerrainType::Wall) {
+    if (cell.getContent() != CellContent::Wall) {
         setPosition(newX, newY);
     }
 }

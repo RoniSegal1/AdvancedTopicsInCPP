@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MyTankAlgorithm.h"
-//#include "BasicTankAlgorithm.h"
+#include "MyBattleInfo.h"
 #include "Board.h"
 #include "Tank.h"
 #include "ActionRequest.h"
@@ -19,8 +19,7 @@
 
 class ChasingTankAlgorithm : public MyTankAlgorithm {
 public:
-    virtual ~ChasingTankAlgorithm() noexcept override = default;
-
+      
     ActionRequest getAction();
 
     void updateBattleInfo(BattleInfo& info);
@@ -28,11 +27,8 @@ public:
 private:
     std::vector<ActionRequest> currentPath; ///< Cached path of actions to perform.
     std::vector<std::pair<int, int>> plannedPositions; ///< Planned positions associated with currentPath.
-    std::pair<int, int> myPosition = { -1, -1 }; ///< My last known position.
-    Direction myDirection = Direction::U; ///< My last known direction.
-    std::pair<int, int> enemyPosition = { -1, -1 }; ///< Current known position of the enemy.
+    std::pair<int, int> enemyPosition = { -1, -1 }; ///< Last known position of the enemy.
     std::pair<int, int> lastEnemyPosition = { -1, -1 }; ///< Last known position of the enemy.
-    Board<PlayerCell> board;
 
     struct State {
         int x, y;
@@ -55,11 +51,7 @@ private:
         }
     };
 
-    ActionRequest tryBasicMoves();
-
     std::pair<std::vector<ActionRequest>, std::vector<std::pair<int, int>>> calculatePathBFS();
-                                                                                    
-    std::pair<int, int> moveInDirection(int x, int y, Direction dir);
 
     ActionRequest inferAction(const State& from, const State& to);
 };

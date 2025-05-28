@@ -1,5 +1,8 @@
 #include "ChasingTankAlgorithm.h"
+#include "MyBattleInfo.h"
 
+
+// TODO: update according to MyBattleInfo
 void ChasingTankAlgorithm::updateBattleInfo(BattleInfo& info){
     myinfo = static_cast<MyBattleInfo&>(info);
     myPosition = myinfo.getMyPosition();
@@ -15,15 +18,17 @@ void ChasingTankAlgorithm::updateBattleInfo(BattleInfo& info){
 ActionRequest ChasingTankAlgorithm::getAction() {
 
     // Try to take a basic safe action first (like moving away from a shell)
-    auto threatingShells = getCurrThreatShells();
-    ActionRequest action = getThreatningNextAction(threatingShells); // TODO: maybe different name
+    auto threatPlaces = getThreatsAroundMe();
+    ActionRequest action = getThreatningNextAction(threatPlaces); // TODO: maybe different name
     if (action != ActionRequest::DoNothing) {
         updatePostAction(action);
+        turnsSinceLastUpdate++;
         return action; // If a valid basic move exists, take it immediately
     }
 
     // for first turn \ search for new target - get information about the game
     if(enemyPosition.first == -1 && enemyPosition.second == -1){
+        turnsSinceLastUpdate = 1;
         return ActionRequest::GetBattleInfo;
     }
 
@@ -42,12 +47,14 @@ ActionRequest ChasingTankAlgorithm::getAction() {
         currentPath.erase(currentPath.begin());
         plannedPositions.erase(plannedPositions.begin());
         updatePostAction(action);
+        turnsSinceLastUpdate++;
         return nextAction;
     }
 
     // No path or reached the end — fallback to default attack
     enemyPosition = {-1, -1}; // reached the enemy - next turn ask for battleInfo
     updatePostAction(action);
+    turnsSinceLastUpdate++;
     // TODO: chack if can shoot
     return ActionRequest::Shoot;
 }
@@ -92,7 +99,7 @@ std::pair<std::vector<ActionRequest>, std::vector<std::pair<int, int>>> ChasingT
         }
 
         // Try moving forward
-        auto [nx, ny] = moveInDirection(current.x, current.y, current.direction);
+        auto [nx, ny] = moveInDirectionD(current.x, current.y, 1, current.direction);
         if (board.isEmptyCell(nx, ny) && !visited[nx][ny][(int)current.direction]) {
             visited[nx][ny][(int)current.direction] = true;
             State next{nx, ny, current.direction};
