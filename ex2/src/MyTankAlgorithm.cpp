@@ -67,7 +67,7 @@ std::pair<int, int> MyTankAlgorithm::moveInDirectionD(int x, int y, int d, Direc
 const std::vector<std::pair<int, int>> MyTankAlgorithm::getXDeltas(int x) const {
     return {
         {x * -1, x * -1}, {0, x * -1}, {x, x * -1},
-        {x * -1, 0},      {0, 0},      {x, 0},
+        {x * -1, 0},                   {x, 0},
         {x * -1, x},      {0, x},      {x, x}
     };
 }
