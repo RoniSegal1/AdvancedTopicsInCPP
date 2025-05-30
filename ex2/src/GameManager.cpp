@@ -29,7 +29,7 @@ bool GameManager::readBoard(const std::string& fileName) {
 
     auto rawMap = readRawMap(file);
     normalizeRawMap(rawMap);
-    board = std::make_unique<Board<GameCell>>(cols, rows);
+    board = std::make_unique<Board<Cell>>(cols, rows);
     placeTerrain(rawMap);
     placeTanks(rawMap);
     if (!inputErrors.empty()) {
@@ -171,7 +171,7 @@ void GameManager::resolveCollisions() {
             }
         }
 
-        GameCell& cell = board->getCell(pos.first, pos.second);
+        Cell& cell = board->getCell(pos.first, pos.second);
         // Wall hit logic: 2 hits destroy the wall
         if (cell.getContent() == CellContent::Wall) {
             cell.incrementWallHits();

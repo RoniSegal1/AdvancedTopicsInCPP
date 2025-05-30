@@ -12,8 +12,8 @@
  */
 class Board {
 private:
-    int width;  ///< Width of the board
-    int height;  ///< Width of the board
+    size_t width;  ///< Width of the board
+    size_t height;  ///< Width of the board
     std::vector<std::vector<Cell>> grid; ///< 2D grid of Cell objects
 
 public:

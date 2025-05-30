@@ -2,10 +2,8 @@
 
 #include "MyTankAlgorithm.h"
 #include "MyBattleInfo.h"
-#include "Board.h"
 #include "Tank.h"
 #include "ActionRequest.h"
-#include "PlayerCell.h"
 #include "BattleInfo.h"
 #include <queue>
 #include <vector>

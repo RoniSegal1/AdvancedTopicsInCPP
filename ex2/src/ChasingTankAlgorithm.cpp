@@ -1,5 +1,6 @@
 #include "ChasingTankAlgorithm.h"
 #include "MyBattleInfo.h"
+#include "ObjectType.h"
 
 
 // TODO: update according to MyBattleInfo
@@ -8,8 +9,8 @@ void ChasingTankAlgorithm::updateBattleInfo(BattleInfo& info){
     myPosition = myinfo.getMyPosition();
     lastEnemyPosition = enemyPosition;
     enemyPosition = myinfo.getEnemyPosition();
-    shellsPositions = myinfo.getShellsPositions(); // הוספתי כי זה חלק מהTHREAT :)
-    updateBoard(info);
+    shellsPositions = myinfo.getShellsPositions(); 
+    updateGrid(info);
 }
 
 /**
@@ -66,8 +67,6 @@ std::pair<std::vector<ActionRequest>, std::vector<std::pair<int, int>>> ChasingT
     std::queue<State> q;
     std::map<State, State> parent;
 
-    int width = board.getWidth();
-    int height = board.getHeight();
     auto visited = std::vector(width, std::vector(height, std::vector(8, false)));
 
     auto [startX, startY] = myPosition;
@@ -100,7 +99,7 @@ std::pair<std::vector<ActionRequest>, std::vector<std::pair<int, int>>> ChasingT
 
         // Try moving forward
         auto [nx, ny] = moveInDirectionD(current.x, current.y, 1, current.direction);
-        if (board.isEmptyCell(nx, ny) && !visited[nx][ny][(int)current.direction]) {
+        if (grid[nx][ny] == ObjectType::Empty && !visited[nx][ny][(int)current.direction]) {
             visited[nx][ny][(int)current.direction] = true;
             State next{nx, ny, current.direction};
             q.push(next);

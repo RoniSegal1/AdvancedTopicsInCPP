@@ -4,7 +4,6 @@
 #include "Direction.h"
 #include "Board.h"
 #include "Direction.h"
-#include "GameCell.h"
 
 /**
  * @class Entity
@@ -68,12 +67,12 @@ public:
      * @param board Reference to board (for wrapping)
      * @return Wrapped (x, y) position one step forward in current direction.
      */
-    std::pair<int, int> getNextPosition(const Board<GameCell>& board) const;
+    std::pair<int, int> getNextPosition(const Board& board) const;
 
     /**
      * @brief Returns the previous position the entity would move to (with wraparound).
      * @param board Reference to board (for wrapping)
      * @return Wrapped (x, y) position one step back in current direction.
      */
-     std::pair<int, int> getPrevPosition(const Board<GameCell>& board) const;
+     std::pair<int, int> getPrevPosition(const Board& board) const;
 };

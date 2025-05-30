@@ -124,12 +124,12 @@ ActionRequest MyTankAlgorithm::CheckIfINeedToShootX(int x) {
         newX += dx;
         newY += dy;
         wrapPosition(newX, newY);
-        auto content = grid[ny][nx];
+        auto content = grid[newX][newY];
         // If we hit a wall, line of sight is blocked
-        if (cell.getContent() == CellContent::Wall) {
+        if (content == ObjectType::Wall) {
             break;
         }
-        if (cell.getContent() == CellContent::EnemyTank) {
+        if (content == ObjectType::EnemyTank) {
             ActionRequest::Shoot;
         }
     }
@@ -152,7 +152,7 @@ std::set<std::pair<int, int>> MyTankAlgorithm::getThreatCellsAroundMe() const {
         int nx = pos.first;
         int ny = pos.second;
         wrapPosition(nx, ny);
-        auto content = grid[ny][nx]
+        auto content = grid[ny][nx];
         if (content == ObjectType::Wall || content == ObjectType::Mine || content == ObjectType::AllyTank || content == ObjectType::EnemyTank) {
             threatPlaces.insert({nx, ny});
         }

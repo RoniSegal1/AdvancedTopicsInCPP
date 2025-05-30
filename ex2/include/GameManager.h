@@ -49,7 +49,7 @@ private:
     std::unique_ptr<PlayerFactory> playerFactory;
     std::unique_ptr<TankAlgorithmFactory> tankFactory;
 
-    std::unique_ptr<Board<GameCell>> board;
+    std::unique_ptr<Board<Cell>> board;
     std::vector<int> playerTankCount;
 
     std::vector<std::string> inputErrors;

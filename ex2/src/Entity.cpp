@@ -25,7 +25,7 @@ void Entity::setPosition(int newX, int newY) {
 /**
  * @brief Computes the next position of the entity in its current direction, with wrapping.
  */
-std::pair<int, int> Entity::getNextPosition(const Board<GameCell>& board) const {
+std::pair<int, int> Entity::getNextPosition(const Board& board) const {
     auto [dx, dy] = getDelta(direction);
     int nx = x + dx;
     int ny = y + dy;
@@ -36,7 +36,7 @@ std::pair<int, int> Entity::getNextPosition(const Board<GameCell>& board) const 
 /**
  * @brief Calculates the previous position of the entity in its current direction, with wrapping.
  */
- std::pair<int, int> Entity::getPrevPosition(const Board<GameCell>& board) const {
+ std::pair<int, int> Entity::getPrevPosition(const Board& board) const {
     auto [dx, dy] = getDelta(direction);
     int nx = x - dx;
     int ny = y - dy;

@@ -4,8 +4,6 @@
 #include "Shell.h"
 #include "Entity.h"
 #include "Board.h"
-#include "Board.h"
-#include "GameCell.h"
 
 #include <set>
 #include <utility>
@@ -44,7 +42,7 @@ public:
     /**
      * @brief Moves the tank one step forward if no wall is ahead.
      */
-    void moveForward(const Board<GameCell>& board);
+    void moveForward(const Board& board);
 
     /**
      * @brief Rotates the tank by a given number of steps (positive = right, negative = left).
@@ -127,7 +125,7 @@ public:
     /**
      * @brief Moves the tank one step backward if no wall is behind.
      */
-    void moveBackward(const Board<GameCell>& board);
+    void moveBackward(const Board& board);
 
     /**
      * @brief Manually sets the backward delay counter.

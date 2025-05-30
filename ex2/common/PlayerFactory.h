@@ -1,3 +1,6 @@
+#pragma once
+#include "Player.h"
+#include <memory>
 
 class PlayerFactory {
 public:

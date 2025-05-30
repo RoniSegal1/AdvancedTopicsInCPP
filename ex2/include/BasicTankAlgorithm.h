@@ -1,17 +1,18 @@
 #pragma once
 
 #include "MyTankAlgorithm.h"
-#include "Board.h"
+#include "BattleInfo.h"
+#include "MyBattleInfo.h"
+#include "ObjectType.h"
 #include "Direction.h"
-#include "PlayerCell.h"
 
 class BasicTankAlgorithm : public MyTankAlgorithm {
 private:
     ActionRequest getScaryNextAction(std::set<std::pair<int, int>> threatPlaces);
 
-    ActionRequest BasicTankAlgorithm::rotateToFreeCell(std::set<std::pair<int, int>> threatPlaces);
+    ActionRequest rotateToFreeCell(std::set<std::pair<int, int>> threatPlaces);
     ActionRequest shouldGetBattleInfo();
-    bool BasicTankAlgorithm::isEmpty() const;
+    bool isEmpty() const;
 
 public:
     BasicTankAlgorithm(int playerIndex, int tankIndex);

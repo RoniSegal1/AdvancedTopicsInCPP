@@ -1,6 +1,6 @@
 #include "MySatelliteView.h"
 
-MySatelliteView::MySatelliteView(const Board<GameCell>& board,
+MySatelliteView::MySatelliteView(const Board& board,
                                  const std::map<std::pair<int, int>, std::vector<Entity*>>& posMap,
                                  std::pair<int, int> requestingTankPos)
     : board(board), positionMap(posMap),

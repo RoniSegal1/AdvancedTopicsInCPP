@@ -9,7 +9,7 @@ void BasicTankAlgorithm::updateBattleInfo(BattleInfo& info){
     myinfo = static_cast<MyBattleInfo&>(info);
     myPosition = myinfo.getMyPosition();
     shellsPositions = myinfo.getShellsPositions();
-    updateBoard(info);
+    updateGrid(info);
 }
 
 /**
@@ -17,7 +17,7 @@ void BasicTankAlgorithm::updateBattleInfo(BattleInfo& info){
  */
 ActionRequest BasicTankAlgorithm::getAction() {
 
-    if (isEmpty()) { // don't have any information about the board, have to get it
+    if (isEmpty()) { // don't have any information about the grid, have to get it
         return shouldGetBattleInfo();
     }
 
@@ -89,6 +89,6 @@ ActionRequest BasicTankAlgorithm::shouldGetBattleInfo() {
     return ActionRequest::GetBattleInfo;
 }
 
-bool BasicTankAlgorithm::isEmpty() const {
-    return board.getHeight() == 0 || board.getWidth() == 0;
+bool BasicTankAlgorithm::isEmpty() const { // TODO: FILL THIS
+    return 0
 }

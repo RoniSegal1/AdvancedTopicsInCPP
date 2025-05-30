@@ -12,14 +12,14 @@
 
 class MySatelliteView : public SatelliteView {
 private:
-    const Board<playercell>& board;
+    const Board& board;
     const std::map<std::pair<int, int>, std::vector<Entity*>>& positionMap;
     int width;
     int height;
     std::pair<int, int> requestingTankPosition;
 
 public:
-    MySatelliteView(const Board<GameCell>& board,
+    MySatelliteView(const Board& board,
                     const std::map<std::pair<int, int>, std::vector<Entity*>>& posMap,
                     std::pair<int, int> requestingTankPos);
 
