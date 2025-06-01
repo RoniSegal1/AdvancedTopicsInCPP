@@ -9,7 +9,6 @@
 class BasicTankAlgorithm : public MyTankAlgorithm {
 private:
     ActionRequest getScaryNextAction(std::set<std::pair<int, int>> threatPlaces);
-
     ActionRequest rotateToFreeCell(std::set<std::pair<int, int>> threatPlaces);
     ActionRequest shouldGetBattleInfo();
     bool isEmpty() const;

@@ -1,5 +1,4 @@
-#ifndef ACTION_REQUEST_UTILS_H
-#define ACTION_REQUEST_UTILS_H
+#pragma once
 
 #include <string>
 #include "ActionRequest.h" 
@@ -18,5 +17,3 @@ inline std::string toString(ActionRequest action) {
         default:                             return "Unknown";
     }
 }
-
-#endif 

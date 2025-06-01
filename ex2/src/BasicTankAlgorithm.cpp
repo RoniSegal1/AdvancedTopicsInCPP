@@ -5,8 +5,8 @@ BasicTankAlgorithm::BasicTankAlgorithm(int playerIndex, int tankIndex)
     : MyTankAlgorithm(playerIndex, tankIndex) {}
 
     
-void BasicTankAlgorithm::updateBattleInfo(BattleInfo& info){
-    myinfo = static_cast<MyBattleInfo&>(info);
+void BasicTankAlgorithm::updateBattleInfo(BattleInfo& info) {
+    auto myinfo = static_cast<MyBattleInfo&>(info);
     myPosition = myinfo.getMyPosition();
     shellsPositions = myinfo.getShellsPositions();
     updateGrid(info);
@@ -25,16 +25,20 @@ ActionRequest BasicTankAlgorithm::getAction() {
     auto action = getThreatningNextAction(threatPlaces); //  check if i am threatend
 
     // If there is no threat, get battle info (if i haven't gotten it in a while)
-    if (action == ActionRequest::DoNothing && turnsSinceLastUpdate >= 4) {
-        return shouldGetBattleInfo();
-    }
-
-    // else - try to rotate or still get battle info
-    ActionRequest action = getScaryNextAction(threatPlaces);
     if (action == ActionRequest::DoNothing) {
-        return shouldGetBattleInfo();
-    }
+        if (turnsSinceLastUpdate >= 4) {
+            return shouldGetBattleInfo();
+        }
 
+        else {
+            // else - try to rotate or still get battle info
+            auto action = getScaryNextAction(threatPlaces);
+            if (action == ActionRequest::DoNothing) {
+                return shouldGetBattleInfo();
+            }
+        }
+    }
+    
     turnsSinceLastUpdate++;
     updatePostAction(action);
     return action;
@@ -44,7 +48,7 @@ ActionRequest BasicTankAlgorithm::getScaryNextAction(std::set<std::pair<int, int
     auto act = ActionRequest::DoNothing;
 
     // check maybe i can turn to a safe place
-    auto act = rotateToFreeCell(threatPlaces);
+    act = rotateToFreeCell(threatPlaces);
 
     // If we chose to stay, maybe we can shoot instead
     if (act == ActionRequest::DoNothing) {
@@ -89,6 +93,13 @@ ActionRequest BasicTankAlgorithm::shouldGetBattleInfo() {
     return ActionRequest::GetBattleInfo;
 }
 
-bool BasicTankAlgorithm::isEmpty() const { // TODO: FILL THIS
-    return 0
+bool BasicTankAlgorithm::isEmpty() const {
+    for (const auto& row : grid) {
+        for (ObjectType obj : row) {
+            if (obj != ObjectType::Empty) {
+                return false;
+            }
+        }
+    }
+    return true;
 }

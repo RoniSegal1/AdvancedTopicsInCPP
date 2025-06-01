@@ -19,12 +19,11 @@
 #include "ActionRequestUtils.h"
 #include "MySatelliteView.h"
 #include "MyPlayer.h"
-#include "GameCell.h"
+#include "Cell.h"
 
 class GameManager {
 public:
-    GameManager(std::unique_ptr<PlayerFactory> playerFactory,
-                std::unique_ptr<TankAlgorithmFactory> tankFactory);
+    GameManager(std::unique_ptr<PlayerFactory> pf, std::unique_ptr<TankAlgorithmFactory> tf);
 
     GameManager(const GameManager&) = delete;
     GameManager& operator=(const GameManager&) = delete;
@@ -46,10 +45,11 @@ private:
     std::map<std::pair<int, int>, std::vector<Entity*>> positionMap;
     std::vector<std::pair<std::unique_ptr<Tank>, std::unique_ptr<TankAlgorithm>>> tankPerAlgoVector;
     int stepCounter = 0;
+
     std::unique_ptr<PlayerFactory> playerFactory;
     std::unique_ptr<TankAlgorithmFactory> tankFactory;
 
-    std::unique_ptr<Board<Cell>> board;
+    std::unique_ptr<Board> board;
     std::vector<int> playerTankCount;
 
     std::vector<std::string> inputErrors;
@@ -76,8 +76,6 @@ private:
     void determineWinner();
 
     std::vector<std::string> readRawMap(std::ifstream& file);
-
-    bool checkWinConditions();
 
     void processTurn();
 

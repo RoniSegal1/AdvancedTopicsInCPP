@@ -1,11 +1,14 @@
 #include "GameManager.h"
 
-GameManager::GameManager(std::unique_ptr<PlayerFactory> playerFactory,
-                         std::unique_ptr<TankAlgorithmFactory> tankFactory)
-    : playerFactory(std::move(playerFactory)),
-      tankFactory(std::move(tankFactory)),
-      playerTankCount(2, 0)
-{}
+// GameManager::GameManager(const PlayerFactory& playerFactory,
+//                          const TankAlgorithmFactory& tankFactory)
+//     : playerFactory(playerFactory),
+//       tankFactory(tankFactory),
+//       playerTankCount(2, 0)
+// {}
+
+GameManager::GameManager(std::unique_ptr<PlayerFactory> pf, std::unique_ptr<TankAlgorithmFactory> tf)
+    : playerFactory(std::move(pf)), tankFactory(std::move(tf)), playerTankCount(2, 0) {}
 
 /**
  * @brief Reads and parses a board file, initializes the board and players.
@@ -24,12 +27,11 @@ bool GameManager::readBoard(const std::string& fileName) {
 
     std::string line;
     std::getline(file, line); // Skip description
-
     if (!parseConfigLines(file)) return false;
 
     auto rawMap = readRawMap(file);
     normalizeRawMap(rawMap);
-    board = std::make_unique<Board<Cell>>(cols, rows);
+    board = std::make_unique<Board>(cols, rows);
     placeTerrain(rawMap);
     placeTanks(rawMap);
     if (!inputErrors.empty()) {
@@ -48,11 +50,12 @@ void GameManager::run(){
     bool won = false;
     // TODO: add what would happen if the game finished 
     while (true && stepCounter < maxSteps) {
+        stepCounter ++;
         processTurn();
         if (checkWinConditions()) {
             won = true;
             break;
-        };
+        }
     }
     if (!won){
         int tankPlayer1 = playerTankCount[0];
@@ -71,27 +74,32 @@ void GameManager::run(){
 */
 void GameManager::processTurn() {
     currentTurnActions.clear();
-    // Get next action for each tank from its algorithm and apply the action
+    rebuildPositionMap();
 
+    size_t tankIndex = 0;
     for (const auto& [tankPtr, algoPtr] : tankPerAlgoVector) {
         Tank* t = tankPtr.get();
         TankAlgorithm* algot = algoPtr.get();
 
         if (!t->getIsAlive()) {
             currentTurnActions.push_back("killed");
+            ++tankIndex;
             continue;
         }
 
-        ActionRequest action = algot->getAction();
+        ActionRequest action;
+        try {
+            action = algot->getAction();
+        } catch (...) {
+            throw;
+        }
         currentTurnActions.push_back(toString(action));
         applyAction(action, *t, *algot, currentTurnActions.size() - 1);
+        ++tankIndex;
     }
-
-    // Move shells and resolve any resulting collisions
     moveShells();
     rebuildPositionMap();
     resolveCollisions();
-
     if (outputLog) {
         for (size_t i = 0; i < currentTurnActions.size(); ++i) {
             *outputLog << currentTurnActions[i];
@@ -101,6 +109,7 @@ void GameManager::processTurn() {
         *outputLog << std::endl;
     }
 }
+
 
 /**
  * @brief Applies a single action for a specific player.
@@ -173,18 +182,18 @@ void GameManager::resolveCollisions() {
 
         Cell& cell = board->getCell(pos.first, pos.second);
         // Wall hit logic: 2 hits destroy the wall
-        if (cell.getContent() == CellContent::Wall) {
+        if (cell.getTerrain() == TerrainType::Wall) {
             cell.incrementWallHits();
             if (cell.getWallHits() >= 2) {
-                cell.resetContent();
+                cell.resetWall();
             }
             removeShells = true;
         }
         
         // Mine logic: destroy any tank stepping on a mine
-        if (cell.getContent() == CellContent::Mine && !localTanks.empty()) {
+        if (cell.getTerrain() == TerrainType::Mine && !localTanks.empty()) {
             removeTanks = true;
-            cell.resetContent();
+            cell.resetMine();
         }
 
         // Shell and tank at same location: both destroyed
@@ -420,8 +429,9 @@ void GameManager::handleNormalAction(ActionRequest action, Tank& tank, TankAlgor
     switch (action) {
         case ActionRequest::GetBattleInfo: {
             int playerIndex = tank.getPlayer();
+            auto pos = tank.getPosition();
             Player& player = *players[playerIndex - 1];
-            MySatelliteView view(*board, positionMap, tank.getPosition());
+            MySatelliteView view(*board, positionMap, pos);
             player.updateTankWithBattleInfo(algot, view);
             break;
         }
@@ -530,22 +540,23 @@ void GameManager::normalizeRawMap(std::vector<std::string>& rawMap) {
 }
 
 void GameManager::placeTerrain(const std::vector<std::string>& rawMap) {
-    for (size_t y = 0; y < rows; ++y) {
-        for (size_t x = 0; x < cols; ++x) {
-            char c = rawMap[y][x];
+    for (size_t x = 0; x < rows; ++x) {
+        for (size_t y = 0; y < cols; ++y) {
+            char c = rawMap[x][y];
             if (c == '#')
-                board->getCell(x, y).setContent(CellContent::Wall);
+                board->getCell(x, y).setTerrain(TerrainType::Wall);
             else if (c == '@')
-                board->getCell(x, y).setContent(CellContent::Mine);
+                board->getCell(x, y).setTerrain(TerrainType::Mine);
         }
     }
 }
 
 
+
 void GameManager::placeTanks(const std::vector<std::string>& rawMap) {
-    for (size_t y = 0; y < rows; ++y) {
-        for (size_t x = 0; x < cols; ++x) {
-            char c = rawMap[y][x];
+    for (size_t x = 0; x < rows; ++x) {
+        for (size_t y = 0; y < cols; ++y) {
+            char c = rawMap[x][y];
 
             if (std::isdigit(c)) {
                 int playerIndex = c - '0';
@@ -557,7 +568,7 @@ void GameManager::placeTanks(const std::vector<std::string>& rawMap) {
 
                 // create the player of he hasn't been created yet
                 if (!players[playerIndex - 1]) {
-                    players[playerIndex - 1] = playerFactory->create(playerIndex, x, y, maxSteps, numShells);
+                    players[playerIndex - 1] = playerFactory->create(playerIndex, rows, cols, maxSteps, numShells);
                 }
 
                 // adjust the direction of the tank

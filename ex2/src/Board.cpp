@@ -4,11 +4,11 @@
 /**
  * @brief Constructor: initializes the grid with Cell objects at each (x, y) location.
  */
-Board::Board(size_t w, size_t h) : width(w), height(h), grid(h) {
-    for (int y = 0; y < h; ++y) {
-        grid[y].reserve(w);
-        for (int x = 0; x < w; ++x) {
-            grid[y].emplace_back(x, y);
+Board::Board(size_t rows, size_t cols) : rows(rows), cols(cols), grid(rows) {
+    for (size_t x = 0; x < rows; ++x) {
+        grid[x].reserve(cols);
+        for (size_t y = 0; y < cols; ++y) {
+            grid[x].emplace_back(x, y);
         }
     }
 }
@@ -18,7 +18,7 @@ Board::Board(size_t w, size_t h) : width(w), height(h), grid(h) {
  */
 const Cell& Board::getCell(int x, int y) const {
     wrapPosition(x, y);
-    return grid[y][x];
+    return grid[x][y];
 }
 
 /**
@@ -26,7 +26,7 @@ const Cell& Board::getCell(int x, int y) const {
  */
 Cell& Board::getCell(int x, int y) {
     wrapPosition(x, y);
-    return grid[y][x];
+    return grid[x][y];
 }
 
 /**
@@ -38,18 +38,18 @@ Cell& Board::getCell(int x, int y) {
     return !(terrain == TerrainType::Wall || terrain == TerrainType::Mine);
 }
 
-int Board::getWidth() const {
-    return width;
+int Board::getCols() const {
+    return cols;
 }
 
-int Board::getHeight() const {
-    return height;
+int Board::getRows() const {
+    return rows;
 }
 
 /**
  * @brief Wraps coordinates if they go beyond the board limits.
  */
 void Board::wrapPosition(int& x, int& y) const {
-    x = (x + width) % width;
-    y = (y + height) % height;
+    x = (x + rows) % rows;
+    y = (y + cols) % cols;
 }

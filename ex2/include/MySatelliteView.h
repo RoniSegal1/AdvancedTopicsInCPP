@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/SatelliteView.h"
+#include "SatelliteView.h"
 #include "Entity.h"
 #include "Board.h"
 #include "Tank.h"
@@ -14,8 +14,8 @@ class MySatelliteView : public SatelliteView {
 private:
     const Board& board;
     const std::map<std::pair<int, int>, std::vector<Entity*>>& positionMap;
-    int width;
-    int height;
+    int rows;
+    int cols;
     std::pair<int, int> requestingTankPosition;
 
 public:
@@ -24,4 +24,6 @@ public:
                     std::pair<int, int> requestingTankPos);
 
     char getObjectAt(size_t x, size_t y) const override;
+
+    ~MySatelliteView() override = default;
 };

@@ -1,4 +1,5 @@
 #include "MyTankAlgorithm.h"
+#include <iostream>
 
 MyTankAlgorithm::MyTankAlgorithm(int playerIndex, int tankIndex)
     : playerIndex(playerIndex),
@@ -31,12 +32,20 @@ void MyTankAlgorithm::updatePostAction(ActionRequest action) {
         case ActionRequest::RotateRight45:
             myDirection = turnRight(myDirection);
             break;
+        case ActionRequest::DoNothing:
+            break;
+        case ActionRequest::Shoot:
+            break;
+        case ActionRequest::GetBattleInfo:
+            break;
     }
 }
 
 void MyTankAlgorithm::updateGrid(BattleInfo& info){
-    // TODO: לעדכן אחרי בניית באטל אינפו
-    // לעדכן גם רוחב ואורך
+    auto myinfo = static_cast<MyBattleInfo&>(info);
+    grid = myinfo.getGrid();
+    rows = static_cast<int>(grid.size());
+    cols = static_cast<int>(grid[0].size());
 }
 
 /**
@@ -96,13 +105,13 @@ ActionRequest MyTankAlgorithm::MoveTankFromDanger(std::set<std::pair<int, int>> 
 
     // Try moving forward if the next cell is safe
     int newX = x + dx;
-    int newY = x + dy;
+    int newY = y + dy;
     if (threatPlaces.count({newX, newY}) == 0) {
         return ActionRequest::MoveForward;
     } else {
         // If not, try moving backward
         int oldX = x - dx;
-        int oldY = x - dy;
+        int oldY = y - dy;
         if (threatPlaces.count({oldX, oldY}) == 0) {
             return ActionRequest::MoveBackward;
         }
@@ -130,7 +139,7 @@ ActionRequest MyTankAlgorithm::CheckIfINeedToShootX(int x) {
             break;
         }
         if (content == ObjectType::EnemyTank) {
-            ActionRequest::Shoot;
+            return ActionRequest::Shoot;
         }
     }
     return ActionRequest::DoNothing;
@@ -152,7 +161,7 @@ std::set<std::pair<int, int>> MyTankAlgorithm::getThreatCellsAroundMe() const {
         int nx = pos.first;
         int ny = pos.second;
         wrapPosition(nx, ny);
-        auto content = grid[ny][nx];
+        auto content = grid[nx][ny];
         if (content == ObjectType::Wall || content == ObjectType::Mine || content == ObjectType::AllyTank || content == ObjectType::EnemyTank) {
             threatPlaces.insert({nx, ny});
         }
@@ -205,6 +214,6 @@ std::set<std::pair<int, int>> MyTankAlgorithm::doDVicinity(int x, int y, int d) 
  * @brief Wraps coordinates if they go beyond the limits.
  */
 void MyTankAlgorithm::wrapPosition(int& x, int& y) const {
-    x = (x + width) % width;
-    y = (y + height) % height;
+    x = (x + rows) % rows;
+    y = (y + cols) % cols;
 }

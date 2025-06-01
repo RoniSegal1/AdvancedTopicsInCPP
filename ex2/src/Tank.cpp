@@ -7,10 +7,10 @@ Tank::Tank(Direction dir, int x, int y, int player, int ammo, int id)
     : Entity(x, y, dir),
       player(player),
       ammo(ammo),
-      shootCooldown(0),
-      backwardDelay(-2),
+      tankId(id),
       isAlive(true),
-      tankId(id)
+      shootCooldown(0),
+      backwardDelay(-2)
       {}
 
 /**

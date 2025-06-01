@@ -1,0 +1,9 @@
+1-Simple Test Map
+MaxSteps = 100
+NumShells = 5
+Rows = 4
+Cols = 8
+########
+#1   @ #
+#   2  #
+########

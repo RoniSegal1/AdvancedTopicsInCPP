@@ -19,10 +19,10 @@ class Tank : public Entity {
 private:
     int player; ///< Player ID (1 or 2)
     int ammo; ///< Current ammunition
-    int shootCooldown = 0; ///< Turns remaining until tank can shoot again
-    int backwardDelay = -2; ///< Counter for backward movement delay
     int tankId; ///< The tanks serial number
     bool isAlive = true; ///< True if alive, False if dead
+    int shootCooldown = 0; ///< Turns remaining until tank can shoot again
+    int backwardDelay = -2; ///< Counter for backward movement delay
 
 public:
     /**

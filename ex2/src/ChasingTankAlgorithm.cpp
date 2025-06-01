@@ -1,11 +1,11 @@
 #include "ChasingTankAlgorithm.h"
-#include "MyBattleInfo.h"
-#include "ObjectType.h"
 
+ChasingTankAlgorithm::ChasingTankAlgorithm(int playerIndex, int tankIndex)
+    : MyTankAlgorithm(playerIndex, tankIndex) {}
 
 // TODO: update according to MyBattleInfo
 void ChasingTankAlgorithm::updateBattleInfo(BattleInfo& info){
-    myinfo = static_cast<MyBattleInfo&>(info);
+    auto myinfo = static_cast<MyBattleInfo&>(info);
     myPosition = myinfo.getMyPosition();
     lastEnemyPosition = enemyPosition;
     enemyPosition = myinfo.getEnemyPosition();
@@ -18,6 +18,13 @@ void ChasingTankAlgorithm::updateBattleInfo(BattleInfo& info){
  **/
 ActionRequest ChasingTankAlgorithm::getAction() {
 
+
+    // for first turn \ search for new target - get information about the game
+    if(enemyPosition.first == -1 && enemyPosition.second == -1){
+        turnsSinceLastUpdate = 1;
+        return ActionRequest::GetBattleInfo;
+    }
+
     // Try to take a basic safe action first (like moving away from a shell)
     auto threatPlaces = getThreatsAroundMe();
     ActionRequest action = getThreatningNextAction(threatPlaces); // TODO: maybe different name
@@ -25,12 +32,6 @@ ActionRequest ChasingTankAlgorithm::getAction() {
         updatePostAction(action);
         turnsSinceLastUpdate++;
         return action; // If a valid basic move exists, take it immediately
-    }
-
-    // for first turn \ search for new target - get information about the game
-    if(enemyPosition.first == -1 && enemyPosition.second == -1){
-        turnsSinceLastUpdate = 1;
-        return ActionRequest::GetBattleInfo;
     }
 
     // Otherwise, prepare to chase the enemy
@@ -64,10 +65,11 @@ ActionRequest ChasingTankAlgorithm::getAction() {
  * @brief Computes a path to the enemy using BFS.
  */
 std::pair<std::vector<ActionRequest>, std::vector<std::pair<int, int>>> ChasingTankAlgorithm::calculatePathBFS() {
+
     std::queue<State> q;
     std::map<State, State> parent;
 
-    auto visited = std::vector(width, std::vector(height, std::vector(8, false)));
+    auto visited = std::vector(rows, std::vector(cols, std::vector(8, false)));
 
     auto [startX, startY] = myPosition;
     State start{startX, startY, myDirection};

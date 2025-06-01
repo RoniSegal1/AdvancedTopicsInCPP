@@ -12,17 +12,17 @@
  */
 class Board {
 private:
-    size_t width;  ///< Width of the board
-    size_t height;  ///< Width of the board
+    size_t rows;  ///< Num of Rows of the board
+    size_t cols;  ///< Num of cols of the board
     std::vector<std::vector<Cell>> grid; ///< 2D grid of Cell objects
 
 public:
     /**
      * @brief Constructs a board with given dimensions.
-     * @param width Number of columns
-     * @param height Number of rows
+     * @param cols Number of columns
+     * @param rows Number of rows
      */
-    Board(size_t width, size_t height);
+    Board(size_t rows, size_t cols);
 
     // Prevent copying
     Board(const Board&) = delete;
@@ -42,8 +42,8 @@ public:
      */
     bool isEmptyCell(int x, int y) const;
 
-    int getWidth() const;
-    int getHeight() const;
+    int getCols() const;
+    int getRows() const;
 
     /**
      * @brief Wraps coordinates around board edges (torus-like behavior).

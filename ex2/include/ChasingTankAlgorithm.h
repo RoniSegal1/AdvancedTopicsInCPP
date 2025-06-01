@@ -5,6 +5,7 @@
 #include "Tank.h"
 #include "ActionRequest.h"
 #include "BattleInfo.h"
+#include "ObjectType.h"
 #include <queue>
 #include <vector>
 #include <tuple>
@@ -18,9 +19,10 @@
 class ChasingTankAlgorithm : public MyTankAlgorithm {
 public:
       
-    ActionRequest getAction();
-
-    void updateBattleInfo(BattleInfo& info);
+    ChasingTankAlgorithm(int playerIndex, int tankIndex);
+    
+    ActionRequest getAction() override;
+    void updateBattleInfo(BattleInfo& info) override;
 
 private:
     std::vector<ActionRequest> currentPath; ///< Cached path of actions to perform.

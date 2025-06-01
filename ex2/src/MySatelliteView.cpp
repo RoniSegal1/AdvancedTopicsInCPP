@@ -4,19 +4,21 @@ MySatelliteView::MySatelliteView(const Board& board,
                                  const std::map<std::pair<int, int>, std::vector<Entity*>>& posMap,
                                  std::pair<int, int> requestingTankPos)
     : board(board), positionMap(posMap),
-      width(board.getWidth()), height(board.getHeight()),
+      rows(board.getRows()), cols(board.getCols()),
       requestingTankPosition(requestingTankPos) {}
 
 char MySatelliteView::getObjectAt(size_t x, size_t y) const {
-    if (x >= (size_t)width || y >= (size_t)height)
+    if (x >= (size_t)rows || y >= (size_t)cols){
         return '&';
+    }
 
     auto it = positionMap.find({(int)x, (int)y});
     if (it != positionMap.end()) {
         for (Entity* e : it->second) {
             if (e->getType() == "Tank") {
-                if (e->getPosition() == requestingTankPosition)
+                if (e->getPosition() == requestingTankPosition){
                     return '%';
+                }
 
                 Tank* tank = dynamic_cast<Tank*>(e);
                 if (tank) {

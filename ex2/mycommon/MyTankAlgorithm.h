@@ -14,8 +14,8 @@ class MyTankAlgorithm : public TankAlgorithm {
 protected:
     int playerIndex;
     int tankIndex;
-    int width;
-    int height;
+    int rows;
+    int cols;
     std::vector<std::vector<ObjectType>> grid;
     std::pair<int,int> myPosition;
     Direction myDirection;
@@ -38,6 +38,7 @@ protected:
 
 public:
     MyTankAlgorithm(int playerIndex, int tankIndex);
-    virtual ActionRequest getAction() = 0;
-    virtual void updateBattleInfo(BattleInfo& info) = 0;
+    virtual ActionRequest getAction() override = 0;
+    virtual void updateBattleInfo(BattleInfo& info) override = 0;
+    ~MyTankAlgorithm() override = default;
 };
