@@ -1,0 +1,9 @@
+Test Map B - Player 1 wins
+MaxSteps = 100
+NumShells = 5
+Rows = 4
+Cols = 8
+########
+# 2   @#
+#1     #
+########

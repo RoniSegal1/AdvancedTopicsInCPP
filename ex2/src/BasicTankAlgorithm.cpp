@@ -20,7 +20,7 @@ ActionRequest BasicTankAlgorithm::getAction() {
     if (isEmpty()) { // don't have any information about the grid, have to get it
         return shouldGetBattleInfo();
     }
-
+    
     auto threatPlaces = getThreatsAroundMe();
     auto action = getThreatningNextAction(threatPlaces); //  check if i am threatend
 
@@ -32,17 +32,18 @@ ActionRequest BasicTankAlgorithm::getAction() {
 
         else {
             // else - try to rotate or still get battle info
-            auto action = getScaryNextAction(threatPlaces);
+            action = getScaryNextAction(threatPlaces);
             if (action == ActionRequest::DoNothing) {
                 return shouldGetBattleInfo();
             }
         }
     }
-    
+
     turnsSinceLastUpdate++;
     updatePostAction(action);
     return action;
 }
+
 
 ActionRequest BasicTankAlgorithm::getScaryNextAction(std::set<std::pair<int, int>> threatPlaces) {
     auto act = ActionRequest::DoNothing;

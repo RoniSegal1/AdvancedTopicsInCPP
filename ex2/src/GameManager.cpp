@@ -25,13 +25,21 @@ bool GameManager::readBoard(const std::string& fileName) {
         return false;
     }
 
+    initOutputLogFromInputFile(fileName);
+
     std::string line;
     std::getline(file, line); // Skip description
     if (!parseConfigLines(file)) return false;
 
     auto rawMap = readRawMap(file);
     normalizeRawMap(rawMap);
-    board = std::make_unique<Board>(cols, rows);
+    for (size_t row = 0; row < rows; ++row) {
+        for (size_t col = 0; col < cols; ++col) {
+            std::cout << rawMap[row][col];
+        }
+        std::cout << '\n';
+    }
+    board = std::make_unique<Board>(rows, cols);
     placeTerrain(rawMap);
     placeTanks(rawMap);
     if (!inputErrors.empty()) {
@@ -52,6 +60,8 @@ void GameManager::run(){
     while (true && stepCounter < maxSteps) {
         stepCounter ++;
         processTurn();
+        // prints for us - delete later! (under)
+        printBoardState();
         if (checkWinConditions()) {
             won = true;
             break;
@@ -665,4 +675,73 @@ void GameManager::writeInputErrorsToFile() {
     for (const std::string& msg : inputErrors) {
         out << msg << "\n";
     }
+}
+
+void GameManager::initOutputLogFromInputFile(const std::string& inputFileName) {
+    // extract file name only from full path (e.g. "input/input_a.txt" -> "input_a.txt")
+    size_t lastSlash = inputFileName.find_last_of("/\\");
+    std::string fileNameOnly = (lastSlash != std::string::npos) ? 
+        inputFileName.substr(lastSlash + 1) : inputFileName;
+
+    // remove "input_" prefix if exists
+    const std::string prefix = "input_";
+    if (fileNameOnly.rfind(prefix, 0) == 0) {
+        fileNameOnly = fileNameOnly.substr(prefix.size()); // remove prefix
+    }
+
+    std::string outputFileName = "output_" + fileNameOnly;
+
+    auto outputStream = std::make_unique<std::ofstream>(outputFileName);
+    if (!outputStream->is_open()) {
+        std::cerr << "Failed to open output file: " << outputFileName << std::endl;
+        return;
+    }
+
+    outputLog = outputStream.get();
+    ownedOutputLog = std::move(outputStream);
+}
+
+// prints for us - delete later!
+void GameManager::printBoardState() {
+    // יוצרים לוח ריק לפי rows ו־cols
+    std::vector<std::vector<char>> display(rows, std::vector<char>(cols, '.'));
+
+    // ממלאים קירות ומוקשים לפי הלוח
+    for (size_t row = 0; row < rows; ++row) {
+        for (size_t col = 0; col < cols; ++col) {
+            const Cell& cell = board->getCell(row, col);
+            switch (cell.getTerrain()) {
+                case TerrainType::Wall:
+                    display[row][col] = '#';
+                    break;
+                case TerrainType::Mine:
+                    display[row][col] = '@';
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    // מציבים טנקים על הלוח
+    for (const auto& pair : tankPerAlgoVector) {
+        const Tank* tank = pair.first.get();
+        auto [x, y] = tank->getPosition(); // נניח ש־x=col, y=row
+        display[x][y] = (tank->getPlayer() == 1 ? '1' : '2');
+    }
+
+    // מציבים פגזים
+    for (const auto& shell : shells) {
+        auto [x, y] = shell->getPosition();
+        display[x][y] = '*';
+    }
+
+    // מדפיסים שורה-שורה
+    for (size_t row = 0; row < rows; ++row) {
+        for (size_t col = 0; col < cols; ++col) {
+            std::cout << display[row][col];
+        }
+        std::cout << '\n';
+    }
+    std::cout << std::endl;
 }

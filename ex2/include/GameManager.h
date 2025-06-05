@@ -53,6 +53,7 @@ private:
     std::vector<int> playerTankCount;
 
     std::vector<std::string> inputErrors;
+    std::unique_ptr<std::ofstream> ownedOutputLog;
     std::ostream* outputLog = nullptr;
     std::vector<std::string> currentTurnActions;
 
@@ -177,5 +178,11 @@ private:
      * @brief Writes all recorded input errors into a text file.
      */
     void writeInputErrorsToFile();
+
+    void initOutputLogFromInputFile(const std::string& inputFileName);
+
+
+    // prints for us - delete later!
+    void printBoardState();
     
 };

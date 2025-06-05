@@ -1,0 +1,10 @@
+Mine Dilemma
+MaxSteps = 100
+NumShells = 10
+Rows = 5
+Cols = 7
+#######
+#1    #
+#  @  #
+#    2#
+#######

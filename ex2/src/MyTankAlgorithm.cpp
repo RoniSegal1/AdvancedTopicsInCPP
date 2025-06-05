@@ -12,10 +12,35 @@ MyTankAlgorithm::MyTankAlgorithm(int playerIndex, int tankIndex)
 }
 
 
+
+#include <string>
+// להסיררררררררררררררררררררררררררררררררררררררררררררררררררררררררררררררררר!
+std::string toStringg(ActionRequest action) {
+    switch (action) {
+        case ActionRequest::MoveForward:     return "MoveForward";
+        case ActionRequest::MoveBackward:    return "MoveBackward";
+        case ActionRequest::RotateLeft90:    return "RotateLeft90";
+        case ActionRequest::RotateRight90:   return "RotateRight90";
+        case ActionRequest::RotateLeft45:    return "RotateLeft45";
+        case ActionRequest::RotateRight45:   return "RotateRight45";
+        case ActionRequest::Shoot:           return "Shoot";
+        case ActionRequest::GetBattleInfo:   return "GetBattleInfo";
+        case ActionRequest::DoNothing:       return "DoNothing";
+        default:                             return "Unknown";
+    }
+}
+
+
+
 void MyTankAlgorithm::updatePostAction(ActionRequest action) {
+    // std::cerr << "הגעתי לפה יאי" << std::endl;
+    // std::cerr << "[Tank " << tankIndex << "] Following path — next action: "
+    //           << toStringg(action) << std::endl;
     switch (action) {
         case ActionRequest::MoveForward:
             myPosition = moveInDirectionD(myPosition.first, myPosition.second, 1, myDirection);
+            // std::cerr << "[Tank " << tankIndex << " in updatePostAction] My position: ("
+            // << myPosition.first << "," << myPosition.second << ")" << std::endl;
             break;
         case ActionRequest::MoveBackward:
             myPosition = moveInDirectionD(myPosition.first, myPosition.second, -1, myDirection);

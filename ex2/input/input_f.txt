@@ -1,0 +1,12 @@
+Maze Challenge
+MaxSteps = 150
+NumShells = 15
+Rows = 7
+Cols = 9
+#########
+#1#   #2#
+# # # # #
+#   #   #
+###   ###
+#   @   #
+#########
