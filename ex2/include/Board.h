@@ -17,10 +17,10 @@ private:
     std::vector<std::vector<Cell>> grid; ///< 2D grid of Cell objects
 
 public:
-    /**
+    /** 
      * @brief Constructs a board with given dimensions.
-     * @param cols Number of columns
      * @param rows Number of rows
+     * @param cols Number of columns
      */
     Board(size_t rows, size_t cols);
 

@@ -31,6 +31,7 @@ protected:
     ActionRequest CheckIfINeedToShootX(int x);
     std::set<std::pair<int, int>> getThreatsAroundMe();
     std::set<std::pair<int, int>> getThreatCellsAroundMe() const;
+    std::set<std::pair<int, int>> getThreatTanksAroundMe() const;
     std::set<std::pair<int, int>> getCurrThreatShells();
     std::vector<std::pair<int, int>> getXDeltas(int x) const;
     std::set<std::pair<int, int>> doDVicinity(int x, int y, int d) const;

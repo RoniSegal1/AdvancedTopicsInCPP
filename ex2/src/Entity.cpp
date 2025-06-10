@@ -1,4 +1,5 @@
 #include "Entity.h"
+#include <iostream>
 
 /**
  * @brief Gets the current direction of the entity.
@@ -27,9 +28,12 @@ void Entity::setPosition(int newX, int newY) {
  */
 std::pair<int, int> Entity::getNextPosition(const Board& board) const {
     auto [dx, dy] = getDelta(direction);
+    std::cout << "Entity " << getType() << " moving from (" << x << ", " << y << ") in direction " << dx << dy << "\n";
     int nx = x + dx;
     int ny = y + dy;
+    std::cout << "Next position before wrapping: (" << nx << ", " << ny << ")\n";
     board.wrapPosition(nx, ny);
+    std::cout << "Next position after wrapping: (" << nx << ", " << ny << ")\n";
     return {nx, ny};
 }
 

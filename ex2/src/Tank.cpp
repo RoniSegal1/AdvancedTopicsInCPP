@@ -46,6 +46,7 @@ std::string Tank::getType() const {
  */
 void Tank::moveForward(const Board& board) {
     auto [newX, newY] = getNextPosition(board);
+    std::cout << "Tank " << tankId << " moving to (" << newX << ", " << newY << ") from (" << x << ", " << y << "\n";
     const Cell& cell = board.getCell(newX, newY);
     if (cell.getTerrain() != TerrainType::Wall) {
         setPosition(newX, newY);

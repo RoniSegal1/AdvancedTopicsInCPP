@@ -131,12 +131,14 @@ ActionRequest MyTankAlgorithm::MoveTankFromDanger(std::set<std::pair<int, int>> 
     // Try moving forward if the next cell is safe
     int newX = x + dx;
     int newY = y + dy;
+    wrapPosition(newX, newY);
     if (threatPlaces.count({newX, newY}) == 0) {
         return ActionRequest::MoveForward;
     } else {
         // If not, try moving backward
         int oldX = x - dx;
         int oldY = y - dy;
+        wrapPosition(oldX, oldY);
         if (threatPlaces.count({oldX, oldY}) == 0) {
             return ActionRequest::MoveBackward;
         }
@@ -192,6 +194,23 @@ std::set<std::pair<int, int>> MyTankAlgorithm::getThreatCellsAroundMe() const {
         }
     }
     return threatPlaces;
+}
+
+std::set<std::pair<int, int>> MyTankAlgorithm::getThreatTanksAroundMe() const {
+    int x = myPosition.first;
+    int y = myPosition.second;
+    std::set<std::pair<int, int>> threatTanks;
+    auto vicinity = doDVicinity(x, y, 1);
+    for (const auto& pos : vicinity) {
+        int nx = pos.first;
+        int ny = pos.second;
+        wrapPosition(nx, ny);
+        auto content = grid[nx][ny];
+        if (content == ObjectType::EnemyTank) {
+            threatTanks.insert({nx, ny});
+        }
+    }
+    return threatTanks;
 }
 
 std::set<std::pair<int, int>> MyTankAlgorithm::getCurrThreatShells() {

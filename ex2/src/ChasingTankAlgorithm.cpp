@@ -78,6 +78,9 @@ void ChasingTankAlgorithm::updateBattleInfo(BattleInfo& info){
  **/
 ActionRequest ChasingTankAlgorithm::getAction() {
 
+    auto [x, y] = getDelta(myDirection);
+    std::cout << x << " " << y << std::endl;
+
     // std::cerr << "[Tank " << tankIndex << "]  My position: (" << myPosition.first << ", " << myPosition.second << ")" << std::endl;
     // std::cerr << "[Tank " << tankIndex << "]  Enemy position: (" << enemyPosition.first << ", " << enemyPosition.second << ")" << std::endl;
 
