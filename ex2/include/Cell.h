@@ -27,7 +27,7 @@ private:
     int x; ///< X coordinate of the cell
     int y; ///< Y coordinate of the cell
     TerrainType terrain; ///< Current terrain type of the cell
-    int wallHits; ///< Number of hits taken by wall (-1 if not a wall)
+    int wallHits; ///< Number of hits taken by wall
 
 public:
     /**

@@ -10,7 +10,7 @@
         "${workspaceFolder}/**"
       ],
       "defines": [],
-      "compilerPath": "C:/MinGW/bin/g++.exe",
+      "compilerPath": "C:/Users/Hagit/Documents/GitHub/AdvancedTopicsInCPP/ex2",
       "cStandard": "c17",
       "cppStandard": "c++20",
       "intelliSenseMode": "windows-gcc-x64"

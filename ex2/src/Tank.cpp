@@ -46,7 +46,6 @@ std::string Tank::getType() const {
  */
 void Tank::moveForward(const Board& board) {
     auto [newX, newY] = getNextPosition(board);
-    std::cout << "Tank " << tankId << " moving to (" << newX << ", " << newY << ") from (" << x << ", " << y << "\n";
     const Cell& cell = board.getCell(newX, newY);
     if (cell.getTerrain() != TerrainType::Wall) {
         setPosition(newX, newY);
@@ -165,10 +164,17 @@ void Tank::moveBackward(const Board& board) {
     }
 }
 
+/**
+ * @brief Marks the tank as dead (not alive).
+ */
 void Tank::markAsDead() {
     isAlive = false;
 }
 
+/**
+ * @brief Checks if the tank is currently alive.
+ * @return True if the tank is alive, false otherwise.
+ */
 bool Tank::getIsAlive() const {
     return isAlive;
 }

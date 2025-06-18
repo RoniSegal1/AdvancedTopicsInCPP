@@ -1,3 +1,0 @@
-GetBattleInfo, GetBattleInfo
-Shoot (killed), Shoot (killed)
-Tie, both players have zero tanks

@@ -3,6 +3,15 @@
 #include <string>
 #include "ActionRequest.h" 
 
+/**
+ * @brief Converts an ActionRequest enum to its string representation.
+ * 
+ * This function maps each possible ActionRequest value to a human-readable string.
+ * It is useful for debugging, logging, and textual output.
+ * 
+ * @param action The ActionRequest value to convert.
+ * @return std::string A string representation of the given action.
+ */
 inline std::string toString(ActionRequest action) {
     switch (action) {
         case ActionRequest::MoveForward:     return "MoveForward";

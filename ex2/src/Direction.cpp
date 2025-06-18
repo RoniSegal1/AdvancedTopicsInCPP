@@ -5,17 +5,18 @@
  */
 std::pair<int, int> getDelta(Direction dir) {
     switch (dir) {
-        case Direction::U:  return {-1, 0};
-        case Direction::UR: return {-1, 1};
-        case Direction::R:  return {0, 1};
+        case Direction::U:  return {0, -1}; 
+        case Direction::UR: return {1, -1};
+        case Direction::R:  return {1, 0};
         case Direction::DR: return {1, 1};
-        case Direction::D:  return {1, 0};
-        case Direction::DL: return {1, -1};
-        case Direction::L:  return {0, -1};
+        case Direction::D:  return {0, 1};
+        case Direction::DL: return {-1, 1};
+        case Direction::L:  return {-1, 0};
         case Direction::UL: return {-1, -1};
         default:            return {0, 0}; // Defensive default
     }
 }
+
 
 /**
  * @brief Checks if dir1 and dir2 point in opposite directions.

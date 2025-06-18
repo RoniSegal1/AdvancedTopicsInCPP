@@ -1,7 +1,0 @@
-GetBattleInfo, GetBattleInfo
-RotateLeft45, RotateLeft45
-RotateLeft45, RotateLeft90
-RotateLeft45, MoveForward
-GetBattleInfo, RotateRight45
-RotateLeft45 (killed), Shoot
-Player 2 won with 1 tanks still alive

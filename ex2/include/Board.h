@@ -17,10 +17,10 @@ private:
     std::vector<std::vector<Cell>> grid; ///< 2D grid of Cell objects
 
 public:
-    /** 
+    /**
      * @brief Constructs a board with given dimensions.
-     * @param rows Number of rows
      * @param cols Number of columns
+     * @param rows Number of rows
      */
     Board(size_t rows, size_t cols);
 
@@ -42,7 +42,14 @@ public:
      */
     bool isEmptyCell(int x, int y) const;
 
+    /**
+     * @brief Returns the number of columns in the board.
+     */
     int getCols() const;
+
+    /**
+     * @brief Returns the number of rows in the board.
+     */
     int getRows() const;
 
     /**

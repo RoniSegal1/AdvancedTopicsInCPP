@@ -1,8 +1,0 @@
-Shoot and Die
-MaxSteps = 10
-NumShells = 1
-Rows = 3
-Cols = 7
-#     #
-#1 * 2#
-#######

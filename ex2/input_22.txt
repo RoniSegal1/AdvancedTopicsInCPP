@@ -1,9 +1,9 @@
-Test Map A - Player 1 wins
+Test - Many Walls
 MaxSteps = 100
 NumShells = 5
 Rows = 4
 Cols = 8
+22222222
 ########
-#1    @#
-#  2   #
-########
+##%#####
+11111111

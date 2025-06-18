@@ -132,7 +132,15 @@ public:
      */
     void setBackwardDelay(int x);
 
+    /**
+     * @brief Marks the tank as dead (not alive).
+     */
     void markAsDead();
 
+
+    /**
+     * @brief Checks if the tank is currently alive.
+     * @return True if the tank is alive, false otherwise.
+     */
     bool getIsAlive() const;
 };

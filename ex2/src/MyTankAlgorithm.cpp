@@ -1,46 +1,30 @@
 #include "MyTankAlgorithm.h"
 #include <iostream>
 
+/**
+ * @brief Constructs a new MyTankAlgorithm object.
+ * @param playerIndex Index of the player (1 or 2).
+ * @param tankIndex Index of the tank (currently always 0).
+ */
 MyTankAlgorithm::MyTankAlgorithm(int playerIndex, int tankIndex)
     : playerIndex(playerIndex),
       tankIndex(tankIndex),
       myPosition({-1, -1}),
       myDirection(playerIndex == 1 ? Direction::L : Direction::R),
-      turnsSinceLastUpdate(0) // TODO: check if needed here. only Basic uses?
-{
-    // אפשרות לאתחול עתידי נוסף אם צריך
-}
+      turnsSinceLastUpdate(0), 
+      shootDelay(0),
+      numShells(-1)
+    
+{}
 
-
-
-#include <string>
-// להסיררררררררררררררררררררררררררררררררררררררררררררררררררררררררררררררררר!
-std::string toStringg(ActionRequest action) {
-    switch (action) {
-        case ActionRequest::MoveForward:     return "MoveForward";
-        case ActionRequest::MoveBackward:    return "MoveBackward";
-        case ActionRequest::RotateLeft90:    return "RotateLeft90";
-        case ActionRequest::RotateRight90:   return "RotateRight90";
-        case ActionRequest::RotateLeft45:    return "RotateLeft45";
-        case ActionRequest::RotateRight45:   return "RotateRight45";
-        case ActionRequest::Shoot:           return "Shoot";
-        case ActionRequest::GetBattleInfo:   return "GetBattleInfo";
-        case ActionRequest::DoNothing:       return "DoNothing";
-        default:                             return "Unknown";
-    }
-}
-
-
-
+/**
+ * @brief Updates internal tank state after executing an action.
+ * @param action The action that was just performed.
+ */
 void MyTankAlgorithm::updatePostAction(ActionRequest action) {
-    // std::cerr << "הגעתי לפה יאי" << std::endl;
-    // std::cerr << "[Tank " << tankIndex << "] Following path — next action: "
-    //           << toStringg(action) << std::endl;
     switch (action) {
         case ActionRequest::MoveForward:
             myPosition = moveInDirectionD(myPosition.first, myPosition.second, 1, myDirection);
-            // std::cerr << "[Tank " << tankIndex << " in updatePostAction] My position: ("
-            // << myPosition.first << "," << myPosition.second << ")" << std::endl;
             break;
         case ActionRequest::MoveBackward:
             myPosition = moveInDirectionD(myPosition.first, myPosition.second, -1, myDirection);
@@ -60,12 +44,17 @@ void MyTankAlgorithm::updatePostAction(ActionRequest action) {
         case ActionRequest::DoNothing:
             break;
         case ActionRequest::Shoot:
+            ShootAShell();
             break;
         case ActionRequest::GetBattleInfo:
             break;
     }
 }
 
+/**
+ * @brief Updates the internal board representation based on external battle info.
+ * @param info The BattleInfo object containing updated board data.
+ */
 void MyTankAlgorithm::updateGrid(BattleInfo& info){
     auto myinfo = static_cast<MyBattleInfo&>(info);
     grid = myinfo.getGrid();
@@ -77,19 +66,11 @@ void MyTankAlgorithm::updateGrid(BattleInfo& info){
  * @brief Moves one step in the given direction with wrapping.
  */
 std::pair<int, int> MyTankAlgorithm::moveInDirectionD(int x, int y, int d, Direction dir) {
-    std::pair<int, int> next;
-    switch (dir) {
-        case Direction::U:         next = { x, y - 1*d }; break;
-        case Direction::UR:        next = { x + 1*d, y - 1*d }; break;
-        case Direction::R:         next = { x + 1*d, y }; break;
-        case Direction::DR:        next = { x + 1*d, y + 1*d }; break;
-        case Direction::D:         next = { x, y + 1*d }; break;
-        case Direction::DL:        next = { x - 1*d, y + 1*d }; break;
-        case Direction::L:         next = { x - 1*d, y }; break;
-        case Direction::UL:        next = { x - 1*d, y - 1*d }; break;
-    }
-    wrapPosition(next.first, next.second); // wrap around edges
-    return next;
+    auto [dx, dy] = getDelta(dir);
+    int nx = x + dx * d;
+    int ny = y + dy * d;
+    wrapPosition(nx, ny);
+    return {nx, ny};
 }
 
 
@@ -115,7 +96,6 @@ ActionRequest MyTankAlgorithm::getThreatningNextAction(std::set<std::pair<int, i
     if (act == ActionRequest::DoNothing) {
         act = CheckIfINeedToShootX(2);
     }
-
     return act;
 }
 
@@ -131,38 +111,64 @@ ActionRequest MyTankAlgorithm::MoveTankFromDanger(std::set<std::pair<int, int>> 
     // Try moving forward if the next cell is safe
     int newX = x + dx;
     int newY = y + dy;
-    wrapPosition(newX, newY);
     if (threatPlaces.count({newX, newY}) == 0) {
         return ActionRequest::MoveForward;
-    } else {
-        // If not, try moving backward
-        int oldX = x - dx;
-        int oldY = y - dy;
-        wrapPosition(oldX, oldY);
-        if (threatPlaces.count({oldX, oldY}) == 0) {
-            return ActionRequest::MoveBackward;
-        }
     }
     return ActionRequest::DoNothing;
 }
 
+
+/**
+ * @brief Checks if the tank can fire
+ */
+bool MyTankAlgorithm::CheckIfCanShoot() const {
+    if (numShells > 0 && shootDelay == 0){
+        return true;
+    }
+    return false;
+}
+
+
+/**
+ * @brief Update backward delay of the shoot
+ */
+void MyTankAlgorithm::ShootAShell() {
+    numShells --;
+    shootDelay = 4;
+}
+
+/**
+ * @brief Update backward delay of the shoot
+ */
+void MyTankAlgorithm::UpdateShootDelay() {
+    if (shootDelay > 0){
+        shootDelay --;
+    }
+}
+
+
 /**
  * @brief Checks if the tank should fire at an enemy tank in its line of sight.
  */
-ActionRequest MyTankAlgorithm::CheckIfINeedToShootX(int x) {
+ActionRequest MyTankAlgorithm::CheckIfINeedToShootX(int p) {
+    if (!CheckIfCanShoot()){
+        return ActionRequest::DoNothing;
+    }
     Direction dir = myDirection;
     auto [dx, dy] = getDelta(dir);
     int newX = myPosition.first;
     int newY = myPosition.second;
+    int left = myPosition.first;
+    int right = myPosition.second;
 
     // Look ahead up to x steps
-    for (int step = 1; step <= x; ++step) {
+    for (int step = 1; step <= p; ++step) {
         newX += dx;
         newY += dy;
         wrapPosition(newX, newY);
-        auto content = grid[newX][newY];
+        auto content = grid[newY][newX];
         // If we hit a wall, line of sight is blocked
-        if (content == ObjectType::Wall) {
+        if (content == ObjectType::Wall || content == ObjectType::AllyTank || (newX == left && newY == right)) {
             break;
         }
         if (content == ObjectType::EnemyTank) {
@@ -172,6 +178,10 @@ ActionRequest MyTankAlgorithm::CheckIfINeedToShootX(int x) {
     return ActionRequest::DoNothing;
 }
 
+/**
+ * @brief Aggregates threats from vicinity and shell trajectories.
+ * @return std::set<std::pair<int, int>> All current threats.
+ */
 std::set<std::pair<int, int>> MyTankAlgorithm::getThreatsAroundMe(){
     auto shells = getCurrThreatShells();
     auto cells = getThreatCellsAroundMe();
@@ -179,6 +189,10 @@ std::set<std::pair<int, int>> MyTankAlgorithm::getThreatsAroundMe(){
     return shells;
 }
 
+/**
+ * @brief Returns dangerous cells around current position (e.g., mines, walls, tanks).
+ * @return Set of dangerous nearby cell positions.
+ */
 std::set<std::pair<int, int>> MyTankAlgorithm::getThreatCellsAroundMe() const {
     int x = myPosition.first;
     int y = myPosition.second;
@@ -188,7 +202,7 @@ std::set<std::pair<int, int>> MyTankAlgorithm::getThreatCellsAroundMe() const {
         int nx = pos.first;
         int ny = pos.second;
         wrapPosition(nx, ny);
-        auto content = grid[nx][ny];
+        auto content = grid[ny][nx];
         if (content == ObjectType::Wall || content == ObjectType::Mine || content == ObjectType::AllyTank || content == ObjectType::EnemyTank) {
             threatPlaces.insert({nx, ny});
         }
@@ -196,23 +210,10 @@ std::set<std::pair<int, int>> MyTankAlgorithm::getThreatCellsAroundMe() const {
     return threatPlaces;
 }
 
-std::set<std::pair<int, int>> MyTankAlgorithm::getThreatTanksAroundMe() const {
-    int x = myPosition.first;
-    int y = myPosition.second;
-    std::set<std::pair<int, int>> threatTanks;
-    auto vicinity = doDVicinity(x, y, 1);
-    for (const auto& pos : vicinity) {
-        int nx = pos.first;
-        int ny = pos.second;
-        wrapPosition(nx, ny);
-        auto content = grid[nx][ny];
-        if (content == ObjectType::EnemyTank) {
-            threatTanks.insert({nx, ny});
-        }
-    }
-    return threatTanks;
-}
-
+/**
+ * @brief Predicts shell danger zones based on prior positions and turns passed.
+ * @return Set of predicted shell impact zones.
+ */
 std::set<std::pair<int, int>> MyTankAlgorithm::getCurrThreatShells() {
     std::set<std::pair<int, int>> threatShells;
     for (const auto& [x, y] : shellsPositions) {
@@ -233,9 +234,9 @@ std::set<std::pair<int, int>> MyTankAlgorithm::getCurrThreatShells() {
  */
 std::vector<std::pair<int, int>> MyTankAlgorithm::getXDeltas(int x) const {
     return {
-        {x * -1, x * -1}, {0, x * -1}, {x, x * -1},
-        {x * -1, 0},                   {x, 0},
-        {x * -1, x},      {0, x},      {x, x}
+        {x * -1, x * -1}, {x * -1, 0}, {x * -1, x},
+        {0, x * -1},                   {0, x},
+        {x, x * -1},      {x, 0},      {x, x}
     };
 }
 
@@ -258,6 +259,6 @@ std::set<std::pair<int, int>> MyTankAlgorithm::doDVicinity(int x, int y, int d) 
  * @brief Wraps coordinates if they go beyond the limits.
  */
 void MyTankAlgorithm::wrapPosition(int& x, int& y) const {
-    x = (x + rows) % rows;
-    y = (y + cols) % cols;
+    y = (y + rows) % rows;
+    x = (x + cols) % cols;
 }

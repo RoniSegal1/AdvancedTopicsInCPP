@@ -1,75 +1,24 @@
 #include "ChasingTankAlgorithm.h"
 
-
-
-// #include <string>
-// // להסיררררררררררררררררררררררררררררררררררררררררררררררררררררררררררררררררר!
-// std::string toString(ActionRequest action) {
-//     switch (action) {
-//         case ActionRequest::MoveForward:     return "MoveForward";
-//         case ActionRequest::MoveBackward:    return "MoveBackward";
-//         case ActionRequest::RotateLeft90:    return "RotateLeft90";
-//         case ActionRequest::RotateRight90:   return "RotateRight90";
-//         case ActionRequest::RotateLeft45:    return "RotateLeft45";
-//         case ActionRequest::RotateRight45:   return "RotateRight45";
-//         case ActionRequest::Shoot:           return "Shoot";
-//         case ActionRequest::GetBattleInfo:   return "GetBattleInfo";
-//         case ActionRequest::DoNothing:       return "DoNothing";
-//         default:                             return "Unknown";
-//     }
-// }
-
-// void printGrid(const std::vector<std::vector<ObjectType>>& grid, int rows, int cols, int tankIndex) {
-//     std::cerr << "[Tank " << tankIndex << "] Grid view:\n";
-//     for (int x = 0; x < rows; ++x) {
-//         for (int y = 0; y < cols; ++y) {
-//             char symbol = '?';
-//             switch (grid[x][y]) {
-//                 case ObjectType::Empty: symbol = '.'; break;
-//                 case ObjectType::Wall:  symbol = '#'; break;
-//                 case ObjectType::Mine:  symbol = '@'; break;
-//                 case ObjectType::AllyTank:  symbol = 'A'; break;
-//                 case ObjectType::EnemyTank:  symbol = 'E'; break;
-//                 case ObjectType::Shell: symbol = '*'; break;
-//                 default: symbol = 'N'; break;
-//             }
-//             std::cerr << symbol;
-//         }
-//         std::cerr << "\n";
-//     }
-//     std::cerr << std::endl;
-// }
-
-// void printVisited(const std::vector<std::vector<std::vector<bool>>>& visited, int rows, int cols, int tankIndex) {
-//     std::cerr << "[Tank " << tankIndex << "] Visited states:\n";
-//     for (int x = 0; x < rows; ++x) {
-//         for (int y = 0; y < cols; ++y) {
-//             std::cerr << "(" << x << "," << y << "): ";
-//             bool found = false;
-//             for (int d = 0; d < 8; ++d) {
-//                 if (visited[x][y][d]) {
-//                     std::cerr << d << " ";
-//                     found = true;
-//                 }
-//             }
-//             if (found)
-//                 std::cerr << "\n";
-//         }
-//     }
-// }
-
-
-
+/**
+ * @brief Constructor for the chasing tank algorithm.
+ */
 ChasingTankAlgorithm::ChasingTankAlgorithm(int playerIndex, int tankIndex)
     : MyTankAlgorithm(playerIndex, tankIndex) {}
 
-// TODO: update according to MyBattleInfo
+
+/**
+ * @brief Updates the tank’s internal information based on new battle data.
+ */
 void ChasingTankAlgorithm::updateBattleInfo(BattleInfo& info){
     auto myinfo = static_cast<MyBattleInfo&>(info);
     myPosition = myinfo.getMyPosition();
     lastEnemyPosition = enemyPosition;
     enemyPosition = myinfo.getEnemyPosition();
     shellsPositions = myinfo.getShellsPositions(); 
+    if (numShells == -1){
+        numShells = myinfo.getNumShells();
+    }
     updateGrid(info);
 }
 
@@ -77,149 +26,63 @@ void ChasingTankAlgorithm::updateBattleInfo(BattleInfo& info){
  * @brief Returns the next action for the tank.
  **/
 ActionRequest ChasingTankAlgorithm::getAction() {
-
-    auto [x, y] = getDelta(myDirection);
-    std::cout << x << " " << y << std::endl;
-
-    // std::cerr << "[Tank " << tankIndex << "]  My position: (" << myPosition.first << ", " << myPosition.second << ")" << std::endl;
-    // std::cerr << "[Tank " << tankIndex << "]  Enemy position: (" << enemyPosition.first << ", " << enemyPosition.second << ")" << std::endl;
-
-    // for first turn \ search for new target - get information about the game
+    UpdateShootDelay();
+    // First turn \ search for new target - get information about the game
     if(enemyPosition.first == -1 && enemyPosition.second == -1){
-        // std::cerr << "[Tank " << tankIndex << "] No enemy known — requesting info." << std::endl;
         turnsSinceLastUpdate = 1;
         return ActionRequest::GetBattleInfo;
     }
-
-    // Try to take a basic safe action first (like moving away from a shell)
-    auto threatPlaces = getThreatsAroundMe();
-    ActionRequest action = getThreatningNextAction(threatPlaces); // TODO: maybe different name
+    // Avoid threats
+    ActionRequest action = getThreatningNextAction(getThreatsAroundMe());
     if (action != ActionRequest::DoNothing) {
-        // std::cerr << "[Tank " << tankIndex << "] Avoiding threat — action: "
-        //       << toString(action) << std::endl;
         updatePostAction(action);
         turnsSinceLastUpdate++;
-        return action; // If a valid basic move exists, take it immediately
+        return action;
     }
-
-    // Otherwise, prepare to chase the enemy
-    // Recalculate path if needed (first time or situation changed)
+    // Shoot in needed
+    if(CheckIfINeedToShootX(6) == ActionRequest::Shoot){
+        if(CheckIfCanShoot()){return HandleShootRequest();}
+    }
+    // Update my info
+    if(turnsSinceLastUpdate > 3){
+        turnsSinceLastUpdate = 1;
+        return ActionRequest::GetBattleInfo;
+    }
+    // Recalculate path if needed
     if (currentPath.empty() || enemyPosition != lastEnemyPosition || myPosition != plannedPositions.front()) {
-        // std::cerr << "[Tank " << tankIndex << "] Recalculating path..." << std::endl;
-        auto pathResult = calculatePathBFS();
-        currentPath = std::move(pathResult.first);
-        plannedPositions = std::move(pathResult.second);
-        lastEnemyPosition = enemyPosition;
+        HandleBFS();
     }
-
+    // No path or reached the end — fallback to default attack or get battle information
+    if(CheckIfINeedToShootX(1) == ActionRequest::Shoot || currentPath.empty()){
+        if(CheckIfCanShoot()){return HandleShootRequest();}
+    }
     // Continue along the current path if it exists
-    if (!currentPath.empty()) {
-        ActionRequest nextAction = currentPath.front();
-        // std::cerr << "[Tank " << tankIndex << "] Following path — next action: "
-        //       << toString(nextAction) << std::endl;
-        currentPath.erase(currentPath.begin());
-        plannedPositions.erase(plannedPositions.begin());
-        // std::cerr << "תדפיסי פה " << std::endl;
-        updatePostAction(nextAction);
-        turnsSinceLastUpdate++;
-        return nextAction;
-    }
-
-    // No path or reached the end — fallback to default attack
-    // std::cerr << "[Tank " << tankIndex << "] No path — defaulting to SHOOT." << std::endl;
-    updatePostAction(ActionRequest::Shoot);
-    turnsSinceLastUpdate++;
+    if (!currentPath.empty()) {return ContinueAlongPath();}
+    // Fallback
     enemyPosition = {-1, -1};
-    // TODO: chack if can shoot
-    return ActionRequest::Shoot;
+    turnsSinceLastUpdate = 1;
+    return ActionRequest::GetBattleInfo;
 }
 
 /**
  * @brief Computes a path to the enemy using BFS.
  */
 std::pair<std::vector<ActionRequest>, std::vector<std::pair<int, int>>> ChasingTankAlgorithm::calculatePathBFS() {
-
-    // printGrid(grid, rows, cols, tankIndex);
-
-    std::queue<State> q;
-    std::map<State, State> parent;
-
-    auto visited = std::vector(rows, std::vector(cols, std::vector(8, false)));
-
-    auto [startX, startY] = myPosition;
-    State start{startX, startY, myDirection};
-    q.push(start);
-    visited[start.x][start.y][(int)start.direction] = true;
-
+    initializeBFS();
     while (!q.empty()) {
-        State current = q.front();
-        q.pop();
-        // std::cerr << "[Tank " << tankIndex << "] Visiting (" << current.x << ", " << current.y
-        //   << ") facing " << (int)current.direction << std::endl;
-        // Check if we reached the enemy's position
-        auto [enemyX, enemyY] = enemyPosition;
-        if (current.x == enemyX && current.y == enemyY) {
-            // Reconstruct path from current to start
-            std::vector<ActionRequest> actions;
-            std::vector<std::pair<int, int>> positions;
-            State node = current;
-            while (node != start) {
-                State prev = parent[node];
-                actions.push_back(inferAction(prev, node));
-                positions.push_back({node.x, node.y});
-                node = prev;
-            }
-            positions.push_back({start.x, start.y});
-            std::reverse(actions.begin(), actions.end());
-            std::reverse(positions.begin(), positions.end());
-            // std::cerr << "[Tank " << tankIndex << "] Final planned positions (BFS path):" << std::endl;
-            // for (const auto& pos : positions) {
-            //     // std::cerr << "  (" << pos.first << "," << pos.second << ")" << std::endl;
-            // }
-            return {actions, positions};
+        State current = getNextStateFromQueue();
+        if (reachedEnemy(current)) {
+            return reconstructPath(current);
         }
-
-        // Try moving forward
-        auto [nx, ny] = moveInDirectionD(current.x, current.y, 1, current.direction);
-        bool isTarget = (nx == enemyPosition.first && ny == enemyPosition.second);
-        // std::cerr << "[Tank " << tankIndex << "] Trying to move from (" << current.x << "," << current.y
-        //   << ") to (" << nx << "," << ny << ") facing " << (int)current.direction << "... ";
-        if ((grid[nx][ny] == ObjectType::Empty || isTarget)  && !visited[nx][ny][(int)current.direction]) {
-            // std::cerr << "Success\n";
-            visited[nx][ny][(int)current.direction] = true;
-            State next{nx, ny, current.direction};
-            q.push(next);
-            parent[next] = current;
-        }
-        else{
-            // if (nx < 0 || ny < 0 || nx >= cols || ny >= rows)
-            //     // std::cerr << "Blocked: out of bounds\n";
-            // else if (grid[nx][ny] != ObjectType::Empty)
-            //     // std::cerr << "Blocked: not empty (grid = " << (int)grid[nx][ny] << ")\n";
-            // else if (visited[nx][ny][(int)current.direction])
-            //     // std::cerr << "Blocked: already visited\n";
-            // else
-            //     std::cerr << "Blocked: unknown reason\n";
-            // Try turning directions
-            for (auto turnFunc : {&turnLeft, &turnRight,
-                                &turnLeftQuarter, &turnRightQuarter}) {
-                Direction newDir = (*turnFunc)(current.direction);
-                if (!visited[current.x][current.y][(int)newDir]) {
-                    // std::cerr << "  Turning from " << (int)current.direction
-                    // << " to " << (int)newDir << ", staying at ("
-                    // << current.x << ", " << current.y << ")\n";
-                    visited[current.x][current.y][(int)newDir] = true;
-                    State next{current.x, current.y, newDir};
-                    q.push(next);
-                    parent[next] = current;
-                }
-            }
-        }
+        tryMoveForward(current);
+        tryAllRotations(current);
     }
-    // No path found
-    // std::cerr << "[Tank " << tankIndex << "] No path found to enemy!" << std::endl;
     return {{}, {}};
 }
+
+// ----------------------------------------------------------------
+//                    getAction UTILITIES
+// ----------------------------------------------------------------
 
 /**
  * @brief Deduces the action needed to go from one state to another.
@@ -237,4 +100,128 @@ ActionRequest ChasingTankAlgorithm::inferAction(const State& from, const State& 
         return ActionRequest::MoveForward;
     }
     return ActionRequest::DoNothing; // fallback
+}
+
+/**
+ * @brief Executes a shoot action and updates internal state accordingly.
+ */
+ActionRequest ChasingTankAlgorithm::HandleShootRequest(){
+    updatePostAction(ActionRequest::Shoot);
+    turnsSinceLastUpdate++;
+    enemyPosition = {-1, -1};
+    return ActionRequest::Shoot;
+}
+
+/**
+ * @brief Recomputes a BFS path to the enemy and stores it in currentPath and plannedPositions.
+ */
+void ChasingTankAlgorithm::HandleBFS(){
+    auto pathResult = calculatePathBFS();
+    currentPath = std::move(pathResult.first);
+    plannedPositions = std::move(pathResult.second);
+    lastEnemyPosition = enemyPosition;
+}
+
+/**
+ * @brief Performs the next action along the precomputed path.
+ */
+ActionRequest ChasingTankAlgorithm::ContinueAlongPath(){
+    ActionRequest nextAction = currentPath.front();
+    currentPath.erase(currentPath.begin());
+    plannedPositions.erase(plannedPositions.begin());
+    updatePostAction(nextAction);
+    turnsSinceLastUpdate++;
+    return nextAction;
+}
+
+// ----------------------------------------------------------------
+//                calculatePathBFS UTILITIES
+// ----------------------------------------------------------------
+
+/**
+ * @brief Initializes the BFS queue and visited states starting from the tank's current position.
+ */
+void ChasingTankAlgorithm::initializeBFS() {
+    visited = std::vector(rows, std::vector(cols, std::vector(8, false)));
+
+    auto [startX, startY] = myPosition;
+    State start{startX, startY, myDirection};
+    q = std::queue<State>();
+    parent.clear();
+
+    q.push(start);
+    visited[start.y][start.x][(int)start.direction] = true;
+}
+
+/**
+ * @brief Retrieves and removes the front state from the BFS queue.
+ */
+ChasingTankAlgorithm::State ChasingTankAlgorithm::getNextStateFromQueue() {
+    State current = q.front();
+    q.pop();
+    return current;
+}
+
+/**
+ * @brief Checks whether the given state corresponds to the current known enemy position.
+ */
+bool ChasingTankAlgorithm::reachedEnemy(const State& current) const {
+    auto [enemyX, enemyY] = enemyPosition;
+    return current.x == enemyX && current.y == enemyY;
+}
+
+/**
+ * @brief Reconstructs the path of actions and positions from the enemy to the tank using the BFS parent map.
+ */
+std::pair<std::vector<ActionRequest>, std::vector<std::pair<int, int>>> 
+ChasingTankAlgorithm::reconstructPath(State current) {
+    std::vector<ActionRequest> actions;
+    std::vector<std::pair<int, int>> positions;
+
+    while (current != State{myPosition.first, myPosition.second, myDirection}) {
+        State prev = parent[current];
+        actions.push_back(inferAction(prev, current));
+        positions.push_back({current.x, current.y});
+        current = prev;
+    }
+
+    positions.push_back(myPosition);
+    std::reverse(actions.begin(), actions.end());
+    std::reverse(positions.begin(), positions.end());
+    return {actions, positions};
+}
+
+
+/**
+ * @brief Attempts to move forward from the current state.
+ */
+void ChasingTankAlgorithm::tryMoveForward(const State& current) {
+    auto [nx, ny] = moveInDirectionD(current.x, current.y, 1, current.direction);
+    ObjectType content = grid[ny][nx];
+
+    if (content != ObjectType::Wall &&
+        content != ObjectType::Mine &&
+        content != ObjectType::AllyTank &&
+        !visited[ny][nx][(int)current.direction]) {
+        
+        visited[ny][nx][(int)current.direction] = true;
+        State next{nx, ny, current.direction};
+        q.push(next);
+        parent[next] = current;
+    }
+}
+
+/**
+ * @brief Tries all possible rotations from the current state.
+ */
+void ChasingTankAlgorithm::tryAllRotations(const State& current) {
+    for (auto turnFunc : {&turnLeft, &turnRight, &turnLeftQuarter, &turnRightQuarter}) {
+        Direction newDir = (*turnFunc)(current.direction);
+        if (!visited[current.y][current.x][(int)newDir]) {
+            visited[current.y][current.x][(int)newDir] = true;
+            State next{current.x, current.y, newDir};
+            q.push(next);
+            parent[next] = current;
+        }
+    }
 }

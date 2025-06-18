@@ -5,10 +5,10 @@
  * @brief Constructor: initializes the grid with Cell objects at each (x, y) location.
  */
 Board::Board(size_t rows, size_t cols) : rows(rows), cols(cols), grid(rows) {
-    for (size_t x = 0; x < rows; ++x) {
-        grid[x].reserve(cols);
-        for (size_t y = 0; y < cols; ++y) {
-            grid[x].emplace_back(x, y);
+    for (size_t y = 0; y < rows; ++y) {
+        grid[y].reserve(cols);
+        for (size_t x = 0; x < cols; ++x) {
+            grid[y].emplace_back(x, y); // Create Cell at (y, x)
         }
     }
 }
@@ -18,7 +18,7 @@ Board::Board(size_t rows, size_t cols) : rows(rows), cols(cols), grid(rows) {
  */
 const Cell& Board::getCell(int x, int y) const {
     wrapPosition(x, y);
-    return grid[x][y];
+    return grid[y][x];
 }
 
 /**
@@ -26,7 +26,7 @@ const Cell& Board::getCell(int x, int y) const {
  */
 Cell& Board::getCell(int x, int y) {
     wrapPosition(x, y);
-    return grid[x][y];
+    return grid[y][x];
 }
 
 /**
@@ -38,10 +38,16 @@ Cell& Board::getCell(int x, int y) {
     return !(terrain == TerrainType::Wall || terrain == TerrainType::Mine);
 }
 
+/**
+ * @brief Returns the number of columns in the board.
+ */
 int Board::getCols() const {
     return cols;
 }
 
+/**
+ * @brief Returns the number of rows in the board.
+ */
 int Board::getRows() const {
     return rows;
 }
@@ -50,6 +56,6 @@ int Board::getRows() const {
  * @brief Wraps coordinates if they go beyond the board limits.
  */
 void Board::wrapPosition(int& x, int& y) const {
-    x = (x + rows) % rows;
-    y = (y + cols) % cols;
+    y = (y + rows) % rows;
+    x = (x + cols) % cols;
 }

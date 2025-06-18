@@ -1,8 +1,0 @@
-Shell Collision
-MaxSteps = 60
-NumShells = 2
-Rows = 3
-Cols = 9
-1       2
-
-#########
