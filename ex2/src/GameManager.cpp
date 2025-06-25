@@ -747,12 +747,7 @@ void GameManager::initOutputLogFromInputFile(const std::string& inputFileName) {
     std::string fileNameOnly = (lastSlash != std::string::npos) ? 
         inputFileName.substr(lastSlash + 1) : inputFileName;
 
-    // remove "input_" prefix if exists
-    const std::string prefix = "input_";
-    if (fileNameOnly.rfind(prefix, 0) == 0) {
-        fileNameOnly = fileNameOnly.substr(prefix.size()); // remove prefix
-    }
-
+    
     // this->inputFileNameOnly = fileNameOnly;
 
     std::string outputFileName = "output_" + fileNameOnly;
